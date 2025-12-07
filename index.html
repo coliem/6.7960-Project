@@ -3,329 +3,450 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
 <link rel="shortcut icon" href="images/icon.ico">
 <style type="text/css">
-	body {
-		background-color: #f5f9ff;
-	}
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    color: #222;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
 
-	/* Hide both math displays initially, will display based on JS detection */
+  a:link,a:visited {
+    color: #0e7862;
+    text-decoration: none;
+  }
+  a:hover {
+    color: #24b597;
+  }
+
+  /* Main page layout: centered content with a left sidebar outline */
+
+  .content-margin-container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
+    box-sizing: border-box;
+    margin-bottom: 16px; /* reduced spacing */
+  }
+
+  .main-content-block {
+    width: 60%;
+    max-width: 900px;
+    box-sizing: border-box;
+    padding: 0 12px;   /* reduced from 16px */
+    background-color: #ffffff;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  .margin-left-block {
+    font-size: 14px;
+    width: 180px;
+    max-width: 180px;
+    box-sizing: border-box;
+    padding: 0 12px;
+  }
+
+  .margin-right-block {
+    font-size: 13px;
+    width: 220px;
+    max-width: 220px;
+    box-sizing: border-box;
+    padding: 0 6px; /* reduced */
+    color: #555;
+  }
+
+  /* Keep the outline as a fixed left sidebar like the original */
+
+  #intro .margin-left-block {
+    position: fixed;
+    top: max(20%, 120px);
+    left: 10px;
+    max-width: 180px;
+  }
+
+  /* Make sure other sections don't shift from the fixed outline width */
+  #prior_work .margin-left-block,
+  #methods .margin-left-block,
+  #discussion .margin-left-block,
+  #conclusion .margin-left-block,
+  #citations .margin-left-block {
+    visibility: hidden;
+  }
+
+  .main-content-block.header-block {
+    margin-top: 20px; /* was 40px */
+    margin-bottom: 0px;
+  }
+
+  table.header {
+    font-weight: 400;
+    font-size: 17px;
+    width: 100%;
+    border-collapse: collapse;
+  }
+  table td, table td * {
+    vertical-align: middle;
+    position: relative;
+  }
+
+  table.paper-code-tab {
+    display: none;
+  }
+
+  h1 {
+    font-size: 28px;
+    margin-top: 20px;  /* reduced */
+    margin-bottom: 8px; /* reduced */
+    font-weight: 600;
+  }
+
+  h3 {
+    margin-top: 14px;
+    margin-bottom: 6px;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .my-video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  p {
+    margin-top: 6px;
+    margin-bottom: 6px; /* tighter paragraphs */
+  }
+
   .mathjax-mobile, .mathml-non-mobile { display: none; }
-
-  /* Show the MathML content by default on non-mobile devices */
   .show-mathml .mathml-non-mobile { display: block; }
   .show-mathjax .mathjax-mobile { display: block; }
 
-	.content-margin-container {
-		display: flex;
-		width: 100%; /* Ensure the container is full width */
-		justify-content: left; /* Horizontally centers the children in the container */
-		align-items: center;  /* Vertically centers the children in the container */
-	}
-	.main-content-block {
-		width: 70%; /* Change this percentage as needed */
-    max-width: 1100px; /* Optional: Maximum width */
-		background-color: #fff;
-		border-left: 1px solid #DDD;
-		border-right: 1px solid #DDD;
-		padding: 8px 8px 8px 8px;
-		font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;#"Avenir";
-	}
-	.margin-left-block {
-			font-size: 14px;
-			width: 15%; /* Change this percentage as needed */
-			max-width: 130px; /* Optional: Maximum width */
-			position: relative;
-			margin-left: 10px;
-			text-align: left;
-			font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;#"Avenir";
-			padding: 5px;
-	}
-	.margin-right-block {
-			font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;#"Avenir";
-			font-size: 14px;
-			width: 25%; /* Change this percentage as needed */
-			max-width: 256px; /* Optional: Maximum width */
-			position: relative;
-			text-align: left;
-			padding: 10px;  /* Optional: Adds padding inside the caption */
-	}
-
-	img {
-			max-width: 100%; /* Make sure it fits inside the container */
-			height: auto;
-			display: block;
-			margin: auto;
-	}
-	.my-video {
-			max-width: 100%; /* Make sure it fits inside the container */
-			height: auto;
-			display: block;
-			margin: auto;
-	}
-	/* Hide both video displays initially, will display based on JS detection */
   .vid-mobile, .vid-non-mobile { display: none; }
-
-  /* Show the video content by default on non-mobile devices */
   .show-vid-mobile .vid-mobile { display: block; }
   .show-vid-non-mobile .vid-non-mobile { display: block; }
 
-	a:link,a:visited
-	{
-		color: #0e7862; /*#1367a7;*/
-		text-decoration: none;
-	}
-	a:hover {
-		color: #24b597; /*#208799;*/
-	}
-
-	h1 {
-		font-size: 18px;
-		margin-top: 4px;
-		margin-bottom: 10px;
-	}
-
-	table.header {
-    font-weight: 300;
-    font-size: 17px;
-    flex-grow: 1;
-		width: 70%;
-    max-width: calc(100% - 290px); /* Adjust according to the width of .paper-code-tab */
-	}
-	table td, table td * {
-	    vertical-align: middle;
-	    position: relative;
-	}
-	table.paper-code-tab {
-	    flex-shrink: 0;
-	    margin-left: 8px;
-	    margin-top: 8px;
-	    padding: 0px 0px 0px 8px;
-	    width: 290px;
-	    height: 150px;
-	}
-
-	.layered-paper { /* modified from: http://css-tricks.com/snippets/css/layered-paper/ */
-		box-shadow:
-		        0px 0px 1px 1px rgba(0,0,0,0.35), /* The top layer shadow */
-		        5px 5px 0 0px #fff, /* The second layer */
-		        5px 5px 1px 1px rgba(0,0,0,0.35), /* The second layer shadow */
-		        10px 10px 0 0px #fff, /* The third layer */
-		        10px 10px 1px 1px rgba(0,0,0,0.35); /* The third layer shadow */
-		margin-top: 5px;
-		margin-left: 10px;
-		margin-right: 30px;
-		margin-bottom: 5px;
-	}
-
-	hr {
-    height: 1px; /* Sets the height of the line to 1 pixel */
-    border: none; /* Removes the default border */
-    background-color: #DDD; /* Sets the line color to black */
+  hr {
+    height: 1px;
+    border: none;
+    background-color: #ddd;
+    margin: 12px 0; /* reduced */
+    max-width: 900px;
   }
 
-	div.hypothesis {
-		width: 80%;
-		background-color: #EEE;
-		border: 1px solid black;
-		border-radius: 10px;
-		-moz-border-radius: 10px;
-		-webkit-border-radius: 10px;
-		font-family: Courier;
-		font-size: 18px;
-		text-align: center;
-		margin: auto;
-		padding: 16px 16px 16px 16px;
-	}
+  div.hypothesis {
+    width: 80%;
+    max-width: 800px;
+    background-color: #EEE;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 16px;
+    text-align: center;
+    margin: 16px auto; /* reduced */
+    padding: 12px; /* reduced */
+  }
 
-	div.citation {
-    font-size: 0.8em;
+  div.citation {
+    font-size: 0.9em;
     background-color:#fff;
-    padding: 10px;
-		height: 200px;
+    padding: 6px; /* reduced */
+    border-top: 1px solid #eee;
   }
 
-	.fade-in-inline {
-		position: absolute;
-		text-align: center;
-		margin: auto;
-		-webkit-mask-image: linear-gradient(to right,
-																			transparent 0%,
-																			transparent 40%,
-																			black 50%,
-																			black 90%,
-																			transparent 100%);
-		mask-image: linear-gradient(to right,
-																transparent 0%,
-																transparent 40%,
-																black 50%,
-																black 90%,
-																transparent 100%);
-		-webkit-mask-size: 8000% 100%;
-		mask-size: 8000% 100%;
-		animation-name: sweepMask;
-		animation-duration: 4s;
-		animation-iteration-count: infinite;
-		animation-timing-function: linear;
-		animation-delay: -1s;
-	}
+  .fade-in-inline {
+    position: absolute;
+    text-align: center;
+    margin: auto;
+    -webkit-mask-image: linear-gradient(to right,
+                                      transparent 0%,
+                                      transparent 40%,
+                                      black 50%,
+                                      black 90%,
+                                      transparent 100%);
+    mask-image: linear-gradient(to right,
+                                transparent 0%,
+                                transparent 40%,
+                                black 50%,
+                                black 90%,
+                                transparent 100%);
+    -webkit-mask-size: 8000% 100%;
+    mask-size: 8000% 100%;
+    animation-name: sweepMask;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    animation-delay: -1s;
+  }
 
-	.fade-in2-inline {
-			animation-delay: 1s;
-	}
+  .fade-in2-inline {
+    animation-delay: 1s;
+  }
 
-	.inline-div {
-			position: relative;
-	    display: inline-block; /* Makes both the div and paragraph inline-block elements */
-	    vertical-align: top; /* Aligns them at the top, you can adjust this to middle, bottom, etc., based on your needs */
-	    width: 50px; /* Optional: Adds space between the div and the paragraph */
-	}
+  .inline-div {
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    width: 50px;
+  }
+
+  @keyframes sweepMask {
+    0%   { -webkit-mask-position: 0% 0; mask-position: 0% 0; }
+    100% { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+  }
+
+  @media (max-width: 900px) {
+    .content-margin-container {
+      justify-content: flex-start;
+    }
+    .main-content-block {
+      width: calc(100% - 220px);
+    }
+  }
+
+  @media (max-width: 700px) {
+    #intro .margin-left-block {
+      position: static;
+      top: auto;
+      left: auto;
+    }
+    #prior_work .margin-left-block,
+    #methods .margin-left-block,
+    #discussion .margin-left-block,
+    #conclusion .margin-left-block,
+    #citations .margin-left-block {
+      display: none;
+    }
+    .main-content-block {
+      width: 100%;
+      max-width: 100%;
+      padding: 0 16px;
+    }
+    .margin-right-block {
+      display: none;
+    }
+  }
+
+  .project-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px; /* reduced */
+    padding-bottom: 4px;
+  }
+
+  .project-header .title-line {
+    font-size: 32px;
+    font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 2px; /* reduced */
+  }
+
+  .project-header .authors {
+    font-size: 17px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .project-header .subtitle {
+    font-size: 18px;
+    margin-top: 0px; /* reduced */
+  }
 
 </style>
 
-	  <title>The Platonic Representation Hypothesis</title>
-      <meta property="og:title" content="The Platonic Representation Hypothesis" />
-			<meta charset="UTF-8">
-  </head>
+<title>6.7960 Fall 2025 Project</title>
+<meta property="og:title" content="6.7960 Fall 2025 Project" />
+<meta charset="UTF-8">
+</head>
 
-  <body>
+<body>
 
-		<div class="content-margin-container">
-				<div class="margin-left-block">
-				</div>
-		    <div class="main-content-block">
-						<table class="header" align=left>
-								<tr>
-									<td colspan=4>
-										<span style="font-size: 32px; font-family: 'Courier New', Courier, monospace; /* Adds fallbacks */">A Grand Unified Theory of Deep Learning</span>
-									</td>
-								</tr>
-								<tr>
-										<td align=left>
-												<span style="font-size:17px"><a href="your_website">Your name</a></span>
-										</td>
-										<td align=left>
-												<span style="font-size:17px"><a href="your_partner's_website">Your partner's name</a></span>
-										</td>
-								<tr>
-									<td colspan=4 align=left><span style="font-size:18px">Final project for 6.7960, MIT</span></td>
-								</tr>
-						</table>
-					</div>
-					<div class="margin-right-block">
-					</div>
+  <!-- Header / title block -->
+  <div class="content-margin-container">
+    <div class="margin-left-block">
+      <!-- empty here, outline lives in intro block -->
+    </div>
+    <div class="main-content-block header-block">
+      <div class="project-header">
+		<div class="title-line">mmWave 3D Reconstruction</div>
+		<div class="authors">
+			<a href="your_website">Christopher Liem</a>
+			and
+			<a href="your_partner's_website">Yibo Cheng</a>
 		</div>
 
-		<div class="content-margin-container" id="intro">
-				<div class="margin-left-block">
-          <!-- table of contents here -->
-          <div style="position:fixed; max-width:inherit; top:max(20%,120px)">
-              <b style="font-size:16px">Outline</b><br><br>
-              <a href="#intro">Introduction</a><br><br>
-              <a href="#does_x_do_y">Does X do Y?</a><br><br>
-              <a href="#implications_and_limitations">Implications and limitations</a><br><br>
-          </div>
-				</div>
-		    <div class="main-content-block">
-            <!--You can embed an image like this:-->
-            <img src="./images/your_image_here.png" width=512px/>
-		    </div>
-		    <div class="margin-right-block">
-						Caption for the image.
-		    </div>
-		</div>
+		<div class="subtitle">Final project for 6.7960, MIT</div>
+	  </div>
 
-    <div class="content-margin-container" id="intro">
-				<div class="margin-left-block">
-				</div>
-		    <div class="main-content-block">
-						<h1>Introduction</h1>
-            Motivate your project. What question are you asking. Why is it unanswered so far? What gap in the literature or practice are you filling?
-            Why is it important?
-		    </div>
-		    <div class="margin-right-block">
-						Margin note that clarifies some detail #main-content-block for intro section.
-		    </div>
-		</div>
+      <hr>
+    </div>
+    <div class="margin-right-block">
+      <!-- optional header margin note -->
+    </div>
+  </div>
 
-		<div class="content-margin-container" id="does_x_do_y">
-				<div class="margin-left-block">
-				</div>
-		    <div class="main-content-block">
-					<h1>Does X do Y?</h1>
-				  It is well known that Y does Y. And this has raised the question does X do Y? Because if Y does Y then it stands to reason that X does Y.
-          But we cannot answer this until we realize the Z implies Y and X can be linked to Z.<br><br>
+  <div class="content-margin-container" id="intro">
+    <div class="margin-left-block">
+      <b style="font-size:16px">Outline</b><br><br>
+      <a href="#intro">Introduction</a><br><br>
+      <a href="#prior_work">Prior Work</a><br><br>
+      <a href="#methods">Methods & Experiments</a><br><br>
+      <a href="#discussion">Discussion</a><br><br>
+      <a href="#conclusion">Conclusion</a><br><br>
+    </div>
+  </div>
 
-          Now let's write some math!<br>
-          <center>
-            <math xmlns="http://www.w3.org/1998/Math/MathML">
-              <mrow>
-                <mrow>
-                  <mo>&#x2202;</mo>
-                  <mi>y</mi>
-                </mrow>
-                <mo>/</mo>
-                <mrow>
-                  <mo>&#x2202;</mo>
-                  <mi>x</mi>
-                </mrow>
-              </mrow>
-              <mo>=</mo>
-              <mi>x</mi>
-            </math>
-          </center>
-          <br>
-          It's probably best to ask an LLM to help do the web
-          formatting for math. You can tell it "convert this latex equation into MathML: $$\frac{\partial dy}{\partial dx} = x$$"
-          But it took me a few tries. So, if you get frustrated, you can embed an image of the equation, or use other packages for
-          rendering equations on webpages.
-		    </div>
-		    <div class="margin-right-block" style="transform: translate(0%, -100%);"> <!-- you can move the margin notes up and down with translate -->
-          Interestingly, Plato also asked if X does Y, in <a href="#ref_1">[1]</a>.
-		    </div>
-		</div>
+  <div class="content-margin-container" id="intro-text">
+    <div class="margin-left-block"></div>
+    <div class="main-content-block">
+      <h1>Introduction</h1>
+	  <hr>
+      Motivate your project. What question are you asking. Why is it unanswered so far? What gap in the literature or practice are you filling?
+      Why is it important?
+    </div>
+    <div class="margin-right-block">
+      Margin note that clarifies some detail #main-content-block for intro section.
+    </div>
+  </div>
 
-		<div class="content-margin-container">
-				<div class="margin-left-block">
-				</div>
-		    <div class="main-content-block">
-            <h1>Another section</h1>
-            In this section we embed a video:
-						<video class='my-video' loop autoplay muted style="width: 725px">
-								<source src="./images/mtsh.mp4" type="video/mp4">
-						</video>
-		    </div>
-		    <div class="margin-right-block">
-					A caption for the video could go here.
-		    </div>
-		</div>
+  <div class="content-margin-container" id="prior_work">
+    <div class="margin-left-block"></div>
+    <div class="main-content-block">
+      <h1>Prior Work</h1>
+	  <hr>
+      talk about prior in this secion
+    </div>
+    <div class="margin-right-block"></div>
+  </div>
 
-		<div class="content-margin-container" id="implications_and_limitations">
-				<div class="margin-left-block">
-				</div>
-		    <div class="main-content-block">
-						<h1>Implications and limitations</h1>
-						Let's end with some discussion of the implications and limitations.
-		    </div>
-		    <div class="margin-right-block">
-		    </div>
-		</div>
+  <div class="content-margin-container" id="methods">
+    <div class="margin-left-block"></div>
+    <div class="main-content-block">
+      <h1>Methods & Experiments</h1>
+	  <hr>
+	  <h3>Architecture</h3>
+      <p>
+        Existing reconstruction models are often trained on vision-like partials which come from visible-light sensors such as cameras or LiDAR. However, these
+        sensors have diffuse reflections and wide, uniform coverage, contrary to the specular, anisotropic, and noisy data received from mmWaves. Thus, in order to
+        shift domains and train our mmWave reconstruction network, we must first encode the physical characteristics of mmWaves into our training architecture.
+      </p>
 
-		<div class="content-margin-container" id="citations">
-				<div class="margin-left-block">
-				</div>
-		    <div class="main-content-block">
-						<div class='citation' id="references" style="height:auto"><br>
-							<span style="font-size:16px">References:</span><br><br>
-							<a id="ref_1"></a>[1] <a href="https://en.wikipedia.org/wiki/Allegory_of_the_cave">Allegory of the Cave</a>, Plato, c. 375 BC<br><br>
-							<a id="ref_2"></a>[2] <a href="">A Human-Level AGI</a>, OpenAI, 2025<br><br>
-						</div>
-		    </div>
-		    <div class="margin-right-block">
-            <!-- margin notes for reference block here -->
-		    </div>
-		</div>
+      <p>
+        First, we construct a training dataset entirely from synthetic point clouds derived from public 3D shape datasets <b>(TODO: ADD DATASETS)</b>.
+        To embed mmWave specularity directly into these synthetic samples, we retain only the points that would (1) produce a specular return and (2) lie on the surface facing the radar.
+        The first condition models the fact that mmWave reflections follow a specular law: a point is visible only if the incoming ray and reflected ray form equal angles with the
+        surface normal in their shared plane. The second condition ensures the training partials only include geometry that physically “faces” the radar, since
+        mmWave sensors rarely receive energy from back-facing or oblique surfaces. In other words, we create the set of partial observations $O$ such that
+        \begin{align*}
+        O &= \left\{ s_i \in F \,\middle|\, \theta_P(s_i) < \tau ,\; V(s_i) = 1 \right\}\\
+        \theta_P(s_i)&=\min_{r\in P}|\arccos(n_i\cdot u_{r,i})|,\, u_{r,i}=\frac{p_r-s_i}{||p_r-s_i||}
+        \end{align*}
+      </p>
 
-	</body>
+      <p>
+        where $s_i$ is a point in the full 3D point cloud $F$ from the public datasets. $\theta_P(s_i)$ is the smallest angular mismatch
+        between $s_i$ and any sensor position in $P$, the set of of possible radar positions, where $n_i$ is the surface normal at $s_i$ and
+        $u_{r,i}$ is the unit vector pointing from $s_i$ to $p_r$. $V(s_i)$ is 1 when $s_i$ lies on the radar facing surface and 0 otherwise.
+      </p>
 
+      <p>
+        Next, we further refine the specular partials by keeping only those points that exhibit anisotropic behavior, which captures the
+        fact that mmWave measurements vary with the angle of incidence and the corresponding reflection strength of each surface.
+
+        To model this behavior, we construct a reflection-dependent visibility filter that selects surface points according
+        to physical constraints on incidence angle and material reflectivity. In other words, we produce the set $O'$ such that
+        \begin{align*}
+          O'=\{s_i\in O\;|\;\theta_H&(n_i)<\tau_H,\;\theta_V(n_i)<\tau_V\}\\
+          \theta_H=|\arccos&(n_i\cdot\begin{bmatrix}1&0&0\end{bmatrix})|\\
+          \theta_V=|\arccos&(n_i\cdot\begin{bmatrix}0&1&0\end{bmatrix})|
+        \end{align*}
+      </p>
+
+      <p>
+        where $\theta_H$ and $\theta_V$ are the angles of the horizontal and vertical specular returns from the point $s_i$.
+      </p>
+
+      <b>TODO:</b>*maybe a paragraph explaining why we can use synthetic data?
+
+	  <p>
+
+	  </p>
+
+	  <h3>Datasets</h3>
+	  <p>
+		We utilize a variety of datasets to train our mmWave reconstruction network:
+		<ul>
+			<li><b>OmniObject3D</b>: A large multi-view 3D dataset comprised of 6,000 scans of real objects in 190 categories.
+			</li>
+			<li><b>Toys4K-3D</b>: A dataset consisting of 4,179 3D objects in 105 categories that capture objects
+			encountered by infants and children.</li>
+			<li><b>Thingiverse (Objaverse)</b>: A subset of around 3.5 million objects from the Thingiverse platform. Most
+			contain untextured meshes, which is useful for learning shape priors. </li>
+		</ul>
+		To evaluate the performance of our model, we use real-world mmWave measurements of 61 objects from the YCB dataset. These objects
+		have diverse properties, both material and geometric, such as wooden v.s. metal and flat v.s. curved. To further
+		test real-world application, both line-of-sight and fully-obstructed mmWave data of each object are used.
+	  </p>
+	  <h3>Training</h3>
+
+	  <h3>Evaluation</h3>
+    </div>
+    <div class="margin-right-block"></div>
+  </div>
+
+  <div class="content-margin-container" id="discussion">
+    <div class="margin-left-block"></div>
+    <div class="main-content-block">
+      <h1>Discussion</h1>
+	  <hr>
+      results
+    </div>
+    <div class="margin-right-block"></div>
+  </div>
+
+  <div class="content-margin-container" id="conclusion">
+    <div class="margin-left-block"></div>
+    <div class="main-content-block">
+      <h1>Conclusion</h1>
+	  <hr>
+      wrap up
+    </div>
+    <div class="margin-right-block"></div>
+  </div>
+
+  <div class="content-margin-container" id="citations">
+    <div class="margin-left-block"></div>
+    <div class="main-content-block">
+      <div class='citation' id="references" style="height:auto"><br>
+        <span style="font-size:16px">References:</span><br><br>
+        <a id="ref_1"></a>[1] <a href="https://en.wikipedia.org/wiki/Allegory_of_the_cave">Allegory of the Cave</a>, Plato, c. 375 BC<br><br>
+        <a id="ref_2"></a>[2] <a href="">A Human-Level AGI</a>, OpenAI, 2025<br><br>
+      </div>
+    </div>
+    <div class="margin-right-block"></div>
+  </div>
+
+</body>
 </html>
