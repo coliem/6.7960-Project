@@ -347,52 +347,7 @@ window.MathJax = {
       <h1>Methods & Experiments</h1>
 	  <hr>
 	  <h3>Architecture</h3>
-      <p>
-        Existing reconstruction models are often trained on vision-like partials which come from visible-light sensors such as cameras or LiDAR. However, these
-        sensors have diffuse reflections and wide, uniform coverage, contrary to the specular, anisotropic, and noisy data received from mmWaves. Thus, in order to
-        shift domains and train our mmWave reconstruction network, we must first encode the physical characteristics of mmWaves into our training architecture.
-      </p>
 
-      <p>
-        First, we construct a training dataset entirely from synthetic point clouds derived from public 3D shape datasets <b>(TODO: ADD DATASETS)</b>.
-        To embed mmWave specularity directly into these synthetic samples, we retain only the points that would (1) produce a specular return and (2) lie on the surface facing the radar.
-        The first condition models the fact that mmWave reflections follow a specular law: a point is visible only if the incoming ray and reflected ray form equal angles with the
-        surface normal in their shared plane. The second condition ensures the training partials only include geometry that physically “faces” the radar, since
-        mmWave sensors rarely receive energy from back-facing or oblique surfaces. In other words, we create the set of partial observations $O$ such that
-        \begin{align*}
-        O &= \left\{ s_i \in F \,\middle|\, \theta_P(s_i) < \tau ,\; V(s_i) = 1 \right\}\\
-        \theta_P(s_i)&=\min_{r\in P}|\arccos(n_i\cdot u_{r,i})|,\, u_{r,i}=\frac{p_r-s_i}{||p_r-s_i||}
-        \end{align*}
-      </p>
-
-      <p>
-        where $s_i$ is a point in the full 3D point cloud $F$ from the public datasets. $\theta_P(s_i)$ is the smallest angular mismatch
-        between $s_i$ and any sensor position in $P$, the set of of possible radar positions, where $n_i$ is the surface normal at $s_i$ and
-        $u_{r,i}$ is the unit vector pointing from $s_i$ to $p_r$. $V(s_i)$ is 1 when $s_i$ lies on the radar facing surface and 0 otherwise.
-      </p>
-
-      <p>
-        Next, we further refine the specular partials by keeping only those points that exhibit anisotropic behavior, which captures the
-        fact that mmWave measurements vary with the angle of incidence and the corresponding reflection strength of each surface.
-
-        To model this behavior, we construct a reflection-dependent visibility filter that selects surface points according
-        to physical constraints on incidence angle and material reflectivity. In other words, we produce the set $O'$ such that
-        \begin{align*}
-          O'=\{s_i\in O\;|\;\theta_H&(n_i)<\tau_H,\;\theta_V(n_i)<\tau_V\}\\
-          \theta_H=|\arccos&(n_i\cdot\begin{bmatrix}1&0&0\end{bmatrix})|\\
-          \theta_V=|\arccos&(n_i\cdot\begin{bmatrix}0&1&0\end{bmatrix})|
-        \end{align*}
-      </p>
-
-      <p>
-        where $\theta_H$ and $\theta_V$ are the angles of the horizontal and vertical specular returns from the point $s_i$.
-      </p>
-
-      <b>TODO:</b>*maybe a paragraph explaining why we can use synthetic data?
-
-	  <p>
-
-	  </p>
 
 	  <h3>Datasets</h3>
 	  <p>
@@ -410,7 +365,67 @@ window.MathJax = {
 		test real-world application, both line-of-sight and fully-obstructed mmWave data of each object are used.
 	  </p>
 	  <h3>Training</h3>
+	  	<p>
+        Existing reconstruction models are often trained on vision-like partials which come from visible-light sensors such as cameras or LiDAR. However, these
+        sensors have diffuse reflections and wide, uniform coverage, contrary to the specular, anisotropic, and noisy data received from mmWaves. Thus, in order to
+        shift domains and train our mmWave reconstruction network, we must first encode the physical characteristics of mmWaves into our training architecture.
+      </p>
 
+      <p>
+        First, we construct a training dataset entirely from synthetic point clouds derived from public 3D shape datasets.
+        To embed mmWave specularity directly into these synthetic samples, we retain only the points that would (1) produce a specular return and (2) lie on the surface facing the radar.
+        The first condition models the fact that mmWave reflections follow a specular law: a point is visible only if the incoming ray and reflected ray form equal angles with the
+        surface normal in their shared plane. The second condition ensures the training partials only include geometry that physically “faces” the radar, since
+        mmWave sensors rarely receive energy from back-facing or oblique surfaces. In other words, we create the set of partial observations $O$ such that
+        \begin{align*}
+        O &= \left\{ s_i \in F \,\middle|\, \theta_P(s_i) < \tau ,\; V(s_i) = 1 \right\}\\\\
+        \theta_P(s_i)&=\min_{r\in P}|\arccos(n_i\cdot u_{r,i})|,\, u_{r,i}=\frac{p_r-s_i}{||p_r-s_i||}
+        \end{align*}
+      </p>
+
+      <p>
+        where $s_i$ is a point in the full 3D point cloud $F$ from the public datasets. $\theta_P(s_i)$ is the smallest angular mismatch
+        between $s_i$ and any sensor position in $P$, the set of of possible radar positions, where $n_i$ is the surface normal at $s_i$ and
+        $u_{r,i}$ is the unit vector pointing from $s_i$ to $p_r$. We choose the parameter $\tau$ to bound $\theta_P(s_i)$. $V(s_i)$ is 1 when $s_i$ lies on the radar facing surface and 0 otherwise.
+      </p>
+
+      <p>
+        Next, we further refine the specular partials by keeping only those points that exhibit anisotropic behavior, which captures the
+        fact that mmWave measurements vary with the angle of incidence and the corresponding reflection strength of each surface.
+
+        To model this behavior, we construct a reflection-dependent visibility filter that selects surface points according
+        to physical constraints on incidence angle and material reflectivity. In other words, we produce the set $O'$ such that
+        \begin{align*}
+          O'=\{s_i\in O\;|\;\theta_H&(n_i)<\tau_H,\;\theta_V(n_i)<\tau_V\}\\\\
+          \theta_H=|\arccos&(n_i\cdot\begin{bmatrix}1&0&0\end{bmatrix})|\\\\
+          \theta_V=|\arccos&(n_i\cdot\begin{bmatrix}0&1&0\end{bmatrix})|
+        \end{align*}
+      </p>
+
+      <p>
+        where $\theta_H$ and $\theta_V$ are the angles of the horizontal and vertical specular returns from the point $s_i$. $\tau_H$ and $\tau_V$
+		are parameters that we choose to simulate different material properties.
+      </p>
+
+	  <p>
+		Finally, we inject Gaussian noise into the synthetic partial point clouds $O'$ to mimic the substantial noise present in real mmWave
+		measurements. To ensure the model learns both to denoise and complete these inputs, we replace the concatenation-based loss that
+		PoinTr uses with the bi-directional Chamfer Distance between the model's predicted point cloud $\hat{F}$ and the ground-truth $F$.
+		$$
+			\mathcal{L}=\frac{1}{|\hat{F}|}\sum_{s_i\in \hat{F}}\min_{g\in F}||s_i-g||+\frac{1}{|F|}\sum_{g\in F}\min_{s_i\in \hat{F}}||g-s_i||
+		$$
+		Intuitively, the bi-directional Chamfer Distance measures how far the predicted shape is from the true shape in both directions:
+		every predicted point must lie close to some ground-truth point and every ground-truth point must be close to some predicted point.
+		This encourages the model to reinterpret the noisy inputs rather than preserve them, allowing it to output a fully denoised and complete
+		point cloud $\hat{F}$.
+
+	  </p>
+
+      <b>TODO:</b>*maybe a paragraph explaining why we can use synthetic data?
+
+	  <p>
+
+	  </p>
 	  <h3>Evaluation</h3>
     </div>
     <div class="margin-right-block"></div>
