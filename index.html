@@ -276,6 +276,31 @@ window.MathJax = {
     margin-right: auto;
   }
 
+  table.results-table {
+    border-collapse: collapse;
+    margin: 10px auto;
+    font-size: 14px;
+  }
+
+  table.results-table th,
+  table.results-table td {
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+    text-align: center;
+  }
+
+  table.results-table th {
+    background-color: #f5f5f5;
+  }
+
+  .table-caption {
+    font-size: 0.9rem;
+    color: #555;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+
 </style>
 
 <title>6.7960 Fall 2025 Project</title>
@@ -608,6 +633,8 @@ window.MathJax = {
     Intuitively, if a point is in a dense region (large $n_{\hat{g}}$ or $n_{\hat{r}}$), its contribution to the loss is down-weighted, encouraging the model to spread points more evenly.
 
 	  </p>
+
+
     </div>
     <div class="margin-right-block"></div>
   </div>
@@ -635,23 +662,39 @@ window.MathJax = {
 	  <hr>
     <h3>Results</h3>
     <p>
-        Following prior work, we use Chamfer Distance and F-Score as the main evaluation metric. Lower CD indicates better reconstruction quality while higher F-Score indicates better reconstruction quality. The table below shows the quantitative performance of PoinTr and our model on a synthetic dataset and real-world mmWave data.
+        Following prior work on point cloud completion, we report:
+      </p>
+      <ul>
+        <li>
+          <b>Chamfer Distance (CD).</b> Lower values indicate better geometric reconstruction.
+        </li>
+        <li>
+          <b>F-Score at a fixed threshold.</b> Higher values indicate better overlap between the predicted and ground-truth
+          point sets.
+        </li>
+      </ul>
+    
+      <h3>Quantitative Results</h3>
+      <p>
+        Table 1 summarizes the performance of PoinTr and our model on both the synthetic mmWave-style dataset and the MITO
+        mmWave dataset. Lower Chamfer Distance and higher F-Score correspond to better reconstructions.
       </p>
 
-      <table border="1" cellpadding="8" cellspacing="0">
+      <div class="table-caption">
+        Table 1: Quantitative comparison between PoinTr and our model on synthetic and real-world mmWave data.
+      </div>
+      <table class="results-table">
         <tr>
-          <th rowspan="2"></th>
+          <th rowspan="2">Model</th>
           <th colspan="2">Synthetic Dataset</th>
-          <th colspan="2">Real World Dataset</th>
+          <th colspan="2">Real-World Dataset</th>
         </tr>
-
         <tr>
           <th>Chamfer Distance</th>
           <th>F-Score</th>
           <th>Chamfer Distance</th>
           <th>F-Score</th>
         </tr>
-
         <tr>
           <th>PoinTr</th>
           <td>0.071</td>
@@ -659,7 +702,6 @@ window.MathJax = {
           <td>0.104</td>
           <td>62%</td>
         </tr>
-
         <tr>
           <th>Our Model</th>
           <td>0.034</td>
@@ -668,57 +710,59 @@ window.MathJax = {
           <td>75%</td>
         </tr>
       </table>
+
       <p>
-      Our model's outputs have lower CD and higher F-Score than PoinTr, proving that it has superior quantitative performance on mmWave inputs. Qualitatively, we visualize
-      PoinTr and our model's completed point clouds in comparison to the ground-truth in the figure below.
+      Our model consistently outperforms PoinTr on both synthetic and real-world datasets, roughly halving the Chamfer
+        Distance on synthetic data and substantially improving F-Score in all settings. These results support our central
+        hypothesis: explicitly encoding mmWave physics into the data, allowing the model to predict full reconstructions, and
+        regularizing point densities leads to meaningful gains in reconstruction quality.
       </p>
       <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
         <img src="images/visualization.png" alt="visualization" style="max-width: 100%; height: auto;">
         <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-          Qualitative Comparison between PoinTr and Our Model
+          Figure 12: Qualitative comparison between PoinTr and our model on mmWave data
         </figcaption>
       </figure>
 
+      <h3>Latent Space Analysis and Inductive Bias</h3>
       <p>
-        The partial point clouds
-
-      </p>
-      <h3>Latent Representation</h3>
-      <p>
-        We investigate why our model outperforms PoinTr by analyzing the latent space of both models on different objects. To achieve this, we visualize the latent features using principal component analysis (PCA). Specifically, we take the output of the transformer's encoder as the latent representation of the input partial point cloud.
-        Then, we apply PCA to reduce the dimension to 2D for visualization. Figure shows the PCA visualization of the latent space of PoinTr (ckpt_a) and our model (ckpt_b).
+        To better understand <em>why</em> our model performs better, we analyze the latent spaces of both models. We extract
+        the encoder outputs as the latent representations of the input partial point clouds and apply PCA to reduce the
+        dimensionality to 2D for visualization.
       </p>
 
       <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
         <img src="images/encoder_pca.png" alt="encoder_pcader_pca" style="max-width: 100%; height: auto;">
         <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-          PCA Analysis on Encoder Output
+          Figure 13: PCA visualization of encoder outputs for PoinTr (left) and our model (right)
         </figcaption>
       </figure>
 
       <p>
-        We also visualize the PCA analysis on the decoder output of both models. The decoder output is the set of point proxies that are used to generate the final point cloud.
-        Figure shows the PCA visualization of the decoder output of PoinTr (ckpt_a) and our model (ckpt_b).
+        We also visualize the PCA embeddings of the decoder outputs, which correspond to the point proxies used to generate
+        the final point cloud.
       </p>
 
       <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
         <img src="images/decoder_pca.png" alt="decoder_pcader_pca" style="max-width: 100%; height: auto;">
         <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-          PCA Analysis on Decoder Output
+          Figure 14: PCA visualization of decoder outputs for PoinTr (left) and our model (right)
         </figcaption>
       </figure>
 
       <p>
-        As shown in both figures, the latent space of PoinTr maps partial point clouds into relatively compact clusters, whereas our model produces a more pronounced separation between points. In our setting, such compact clustering is undesirable because the inputs correspond to inherently dissimilar objects.
-        with distinct geometric features. The fact that PoinTr collapses these diverse partial observations into similar regions in the latent space suggests that
-        it fails to retain the geometric pairwise relationships between points, making it difficult to reconstruct the missing regions of the point cloud.
+        In both encoder and decoder latent spaces, our model maps different objects into more clearly separated regions, with
+        clusters that correlate with object categories or coarse shape families. In contrast, PoinTr’s latent space exhibits
+        substantial overlap among objects, suggesting that it struggles to disentangle different shapes under mmWave-style
+        sparsity and noise.
       </p>
 
       <p>
-        In contrast, our model's ability to maintain clear separation between points implies that it is able to preserve the differences in the
-        underlying geometry of the object despite the noisy and sparse mmWave measurements. The ability to retain these geometric relationships provides the decoder
-        with richer, informative features, enabling our model to produce more accurate reconstructions. Ultimately, our analysis of the latent space aligns with our
-        results: our model is able to project the input partials into meaningful representations, allowing it to produce better reconstructions than PoinTr.
+        This observation supports the view that architectural and loss-function choices act as inductive biases that reshape
+        the model’s latent manifold. By forcing the model to reconstruct the full point cloud and match density distributions,
+        we implicitly encourage a representation space in which objects with different global geometries occupy distinct, more
+        structured regions. This, in turn, makes it easier for the decoder to infer missing geometry even when the input
+        observation is severely degraded by mmWave artifacts.
       </p>
       <h3>Limitations</h3>
       <p>
@@ -727,20 +771,37 @@ window.MathJax = {
         one for the large clamp, which resulted in a worse input to be fed to our model. As a result, our model's performance deteriorates as our test object gets smaller. This can be visualized in the figure
         below.
       </p>
-      <b>TODO: maybe give chamfer distances of the clamps + visualize clamp completed PC</b>
+      
+      <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+        <img src="images/clamps.png" alt="clamps" style="max-width: 100%; height: auto;">
+        <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+          Figure 15: Clamps of different sizes
+        </figcaption>
+      </figure>
+
       <p>
         We additionally observe poor performance on fruits, which we attribute to their high curvature—geometry that real mmWave sensors weren't able to capture accurately.
         This limitation suggests that our synthetic data generation did not sufficiently model the complex mmWave behavior exhibited by such surfaces. Since our pipeline utilizes
         a simplified approximation of mmWave physics, future work could improve performance by incorporating more accurate approximations into the data filters.
 
       </p>
-      <b>TODO: Add apple figure stuff?</b>
+      <figure style="max-width: 300px; margin: 0 auto; text-align: center;">
+        <img src="images/orange.png" alt="orange" style="max-width: 100%; height: auto;">
+        <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+          Figure 16: Point cloud of an orange that combines input (blue), prediciton (red), and ground truth (green)
+        </figcaption>
+      </figure>
       <p>
         Finally, our model performs poorly on objects composed of regions with differing reflectivity, causing real-world mmWave point clouds to fragment into separate clusters. For instance, a
         hammer’s metallic head and wooden handle produce two distinct returns, yielding disjoint point cloud segments.
         Our synthetic data pipeline does not currently model such material-dependent reflectivity, leading to degraded performance on these mixed-material objects compared to those with uniform surfaces.
       </p>
-      <b>TODO: ADD HAMMER STUFF</b>
+      <figure style="max-width: 800px; margin: 0 auto; text-align: center;">
+        <img src="images/hammer.png" alt="hammer" style="max-width: 100%; height: auto;">
+        <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+          Figure 17: Point cloud of a hammer
+        </figcaption>
+      </figure>
 
       <p>Nonetheless, we successfully adapted the PoinTr backbone to achieve substantially better performance on mmWave measurements. This result is significant, as it illustrates how transfer learning
         can enable state-of-the-art models to be repurposed effectively for domain-specific applications, such as mmWave sensing.
