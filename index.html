@@ -411,7 +411,7 @@ window.MathJax = {
       <h1>Methods & Experiments</h1>
 	  <hr>
     <p>
-      We build upon PoinTr, a transformer-based point cloud completion model, and introduce several key modifications to adapt 
+      We build upon PoinTr, a transformer-based point cloud completion model, and introduce several key modifications to adapt
       it to the unique physical characteristics of mmWave radar signals. Below, we describe our synthetic dataset generation pipeline, architectural changes, and density-aware loss.</p>
 
 
@@ -447,10 +447,10 @@ window.MathJax = {
 
     <p>
       Existing point cloud completion models are typically trained on vision-style partials from visible-light sensors such as RGB-D cameras or LiDAR. mmWave signals, however,
-      produce sparse, specular, anisotropic reflections with significant noise and limited angular resolution. To close the domain gap, we encode mmWave physics into the training sampels. 
+      produce sparse, specular, anisotropic reflections with significant noise and limited angular resolution. To close the domain gap, we encode mmWave physics into the training sampels.
     </p>
 
-    We illustrate the preprocessing pipeline using a lion sample, assuming the radar is located above it. 
+    We illustrate the preprocessing pipeline using a lion sample, assuming the radar is located above it.
 
     <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
       <img src="images/complete_lion.png" alt="Lion" style="max-width: 100%; height: auto;">
@@ -580,17 +580,29 @@ window.MathJax = {
     <div class="margin-right-block"></div>
   </div>
 
-  <div class="content-margin-container" id="discussion">
+  <div class="content-margin-container" id=".">
     <div class="margin-left-block"></div>
     <div class="main-content-block">
-      <h1>Experiments and Results</h1>
+      <h3>Experiments</h3>
       <p>
         To evaluate the performance of our model, we use real-world mmWave measurements of 61 objects from the MITO dataset. The dataset include daily objects with
 		    diverse properties, both material and geometric, such as wooden v.s. metal and flat v.s. curved. To further
 		    test real-world application, both line-of-sight and fully-obstructed mmWave data of each object are used.
       </p>
 
-      <p>
+
+
+    </div>
+    <div class="margin-right-block"></div>
+  </div>
+
+  <div class="content-margin-container" id="discussion">
+    <div class="margin-left-block"></div>
+    <div class="main-content-block">
+      <h1>Discussion</h1>
+	  <hr>
+    <h3>Results</h3>
+    <p>
         Following prior work, we use Chamfer Distance and F-Score as the main evaluation metric. Lower CD indicates better reconstruction quality. Higher F-Score indicates better reconstruction quality. Table shows the quantitative performance of PoinTr and our model on synthetic dataset and real-world mmWave data.
       </p>
 
@@ -636,17 +648,6 @@ window.MathJax = {
         Our model outperforms PoinTr on both synthetic and real-world datasets, demonstrating the effectiveness of our modifications in adapting to mmWave data.
 
       </p>
-
-
-    </div>
-    <div class="margin-right-block"></div>
-  </div>
-
-  <div class="content-margin-container" id="discussion">
-    <div class="margin-left-block"></div>
-    <div class="main-content-block">
-      <h1>Discussion</h1>
-	  <hr>
       <p>
         We further inverstigate why our model outperforms PoinTr by analyzing the latent space of both models. We visualize
         the latent space using PCA. Specifically, we take the output of the transformer encoder as the latent representation of the input partial point cloud.
@@ -680,13 +681,13 @@ window.MathJax = {
 
       <p>
         Despite our improved performance in comparison to PoinTr, our model still has limitations in accuracy, specifically with small objects that have irregular shape. For the case of small objects,
-        we tested our model on a large clamp, a medium clamp, and a small clamp. The real mmWave point cloud of the clamp was substantially lower resolution than the 
+        we tested our model on a large clamp, a medium clamp, and a small clamp. The real mmWave point cloud of the clamp was substantially lower resolution than the
         one for the large clamp, which resulted in a worse input to be fed to our model. As a result, our model's performance deteriorates as our test object gets smaller. This can be visualized in the figure
-        below. 
+        below.
       </p>
       <b>TODO: maybe give chamfer distances of the clamps + visualize clamp completed PC</b>
       <p>
-        Furthermore, our model 
+        Furthermore, our model
       </p>
 
       <p>
@@ -696,7 +697,7 @@ window.MathJax = {
       <b>TODO: significance is that we were able to apply specialize existing state of the art models into different sensor domains,
         allowing us to fine tune models for specific applications or smth
       </b>
-      
+
       <b>hammer: handle and head different materials -> different reflection so point cloud detached -> can't account for this</b>
     </div>
     <div class="margin-right-block"></div>
@@ -708,12 +709,12 @@ window.MathJax = {
       <h1>Conclusion</h1>
 	  <hr>
       <q>
-        In this project, we set out to adapt state-of-the-art point cloud completion techniques to the fundamentally different sensing regime of mmWave radar. Unlike vision-based sensors, 
-        mmWave systems generate highly sparse, noisy, and specular measurements, making direct application of existing models ineffective. To address this challenge, we introduced a physics-aware 
+        In this project, we set out to adapt state-of-the-art point cloud completion techniques to the fundamentally different sensing regime of mmWave radar. Unlike vision-based sensors,
+        mmWave systems generate highly sparse, noisy, and specular measurements, making direct application of existing models ineffective. To address this challenge, we introduced a physics-aware
         synthetic data pipeline, a full-reconstruction architecture that enables implicit denoising, and a density-aware loss that promotes more uniform point distributions.
 
-        Through extensive experiments on both synthetic data and real-world measurements from the MITO dataset, our model consistently outperforms PoinTr across Chamfer Distance and F-Score metrics. 
-        Qualitative results further demonstrate improved geometric fidelity, especially in cases where mmWave sparsity is severe. Latent-space analysis suggests that our architectural changes lead to 
+        Through extensive experiments on both synthetic data and real-world measurements from the MITO dataset, our model consistently outperforms PoinTr across Chamfer Distance and F-Score metrics.
+        Qualitative results further demonstrate improved geometric fidelity, especially in cases where mmWave sparsity is severe. Latent-space analysis suggests that our architectural changes lead to
         more structured and discriminative feature representations, enabling the model to better distinguish object categories and infer missing geometry.
 
         Beyond performance gains, this work contributes to the broader understanding of deep learning in several ways:
@@ -728,10 +729,10 @@ window.MathJax = {
         </ul>
 
 
-        While our approach significantly improves reconstruction quality, challenges remain, especially for small or irregular objects that produce weak mmWave returns. Future work may integrate richer 
+        While our approach significantly improves reconstruction quality, challenges remain, especially for small or irregular objects that produce weak mmWave returns. Future work may integrate richer
         generative priors, differentiable radar simulation, or multi-sensor fusion to further enhance robustness.
 
-        Overall, our findings underscore a key lesson: deep learning models are not merely pattern matchers but systems whose effectiveness depends critically on the inductive biases we embed into their data, architecture, and objectives. By aligning these biases with the physics of mmWave sensing, 
+        Overall, our findings underscore a key lesson: deep learning models are not merely pattern matchers but systems whose effectiveness depends critically on the inductive biases we embed into their data, architecture, and objectives. By aligning these biases with the physics of mmWave sensing,
         we move toward reliable 3D perception beyond the domain of traditional vision sensors.
       </q>
     </div>
