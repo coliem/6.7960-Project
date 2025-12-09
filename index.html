@@ -323,8 +323,30 @@ window.MathJax = {
     <div class="main-content-block">
       <h1>Introduction</h1>
 	  <hr>
-      Motivate your project. What question are you asking. Why is it unanswered so far? What gap in the literature or practice are you filling?
-      Why is it important?
+      <p>
+        A point cloud is a set of discrete data points in space that, when concatenated together, can be used to represent a 3D shape or object.
+        As a result, point clouds have various roles in autonomous driving, medical imaging, robotic manipulation, and more. For example,
+        autonomous vehicles typically utilize LiDAR sensors to generate point clouds for real-time 3D perception of their environment. In particular,
+         point clouds provide precise information about the distance and shape of surrounding objects that computer vision techniques alone can't achieve.
+         In combination with semantic-processing, this information allows the vehicle to recognize when it is in a dangerous situation and decide the best
+         action to take.
+      </p>
+      <p>
+        However, despite its widespread use in multiple industries, point clouds are often incomplete due to various reasons: missing object details,
+        occlusion, sensor resolution, and more. This motivates the open-research field of 3D reconstruction where the missing regions of the incomplete
+        point clouds are recovered.
+      </p>
+      <p>
+        Another substantial research field is the application of millimeter waves, or mmWave for short. mmWaves are radio-frequency signals
+        that offer massive bandwidths for communication, which companies such as Verizon exploit for their 5G network. More interestingly to us, mmWaves can travel
+        through occlusions such as boxes to detect hidden objects. However, the distinct physical properties of mmWaves cause their measurements to be more sparse and noisy
+         than visible-light sensors such as LiDARS, further motivating the field of point cloud completion using different sensors.
+      </p>
+
+      <p>
+        In the following sections, we build off of current state-of-the-art methods for 3D reconstruction to produce a model
+        that performs well on mmWave-generated point clouds and evaluate potential reasons that led to our results.
+      </p>
     </div>
     <div class="margin-right-block">
       Margin note that clarifies some detail #main-content-block for intro section.
@@ -347,35 +369,37 @@ window.MathJax = {
         connects a set of points with non-overlapping triangles such that no point is inside the circumscribed circle within any triangle. While these
         methods have provable geometric and topological guarantees, they require dense sampling of the desired surface which is often
         impractical for imperfect real-world data. This limitation motivates a transition toward learning-based approaches, which aim
-        to infer missing geometry based on learned priors rather than strict analytical rules. 
+        to infer missing geometry based on learned priors rather than strict analytical rules.
       </p>
       <p>
-        More recently, transformer-based models such as PoinTr leverage attention mechanisms to capture the geometric relationships 
-        between points. The pipeline for PoinTr can be summarized into three key points:
+        More recently, transformer-based models such as PoinTr leverage attention mechanisms to capture the geometric relationships
+        between points. The pipeline for PoinTr can be summarized into two key points:
         <ol>
           <li>
             The point clouds in a local region are condensed into a feature vector which is called a "Point Proxy." Thus, the input point cloud is converted
-            into a sequence of Point Proxies which are then fed into the rest of the pipeline for processing. 
+            into a sequence of Point Proxies which are then fed into the rest of the pipeline for processing.
           </li>
           <li>
             To solve point cloud completion as a set-to-set translation problem, an encoder-decoder architecture is used. Given a set of Point Proxies,
             or partial point clouds, we wish to output a set of complete point clouds. To achieve this, the encoder maps the Point Proxies into
-            a latent space that hopefully preserves important features which the decoder uses to infer the missing points. Specifically, 
-            geometry-aware transformer blocks are used to model the pairwise geometric relations between points which are crucial for the 
-            decoder to reason about the missing regions. This allows the model to leverage the inductive biases
+            a latent space that hopefully preserves important features which the decoder uses to infer the missing points. Specifically,
+            geometry-aware transformer blocks are used to model the pairwise geometric relations between points which are crucial for the
+            decoder to reason about the missing regions. This allows the model to leverage the inductive biases of 3D geometric structures
+            in point clouds.
           </li>
-          <li>
-            A geometry-aware transformer block models the relationships between all 
-          </li>
-
         </ol>
-
-        
       </p>
-
       <p>
-        While prior models may perform well on vision-like partial point clouds, they don't generalize well to 
-        the sparse and noisy partials produced by mmWave measurements.
+        When benchmarked using the L1 Chamfer Distance on the PCN dataset, it was shown that PoinTr had substantially better performance
+        than other state-of-the-art methods such as TopNet and Point Cloud Completion Network, both of which are also learning-based approaches
+        to the same problem. It is important to note, however, that all of these existing methods are able to produce reasonable outputs when given
+        incomplete data.
+      </p>
+      <p>
+        While prior models may perform well on vision-like partial point clouds, they don't generalize well to
+        the sparse and noisy partials produced by mmWave measurements. Thus, we wish to build off of the recent
+        advancements in learning-based 3D reconstruction to solve the domain-specific problem of mmWave-produced point cloud
+        completion.
       </p>
     </div>
     <div class="margin-right-block"></div>
@@ -484,7 +508,7 @@ window.MathJax = {
 
 	  <p>
 		Finally, we inject Gaussian noise into the synthetic partial point clouds $O'$ to mimic the substantial noise present in real mmWave
-		measurements. 
+		measurements.
 
     </p>
 
@@ -500,7 +524,7 @@ window.MathJax = {
     <p>
       The second change we make is the architecture of PoinTr. Originally, given a partial point cloud, PoinTr predicts the missing part and directly
       concatenate the prediction with the input partial to form the final output. However, this design assumes that the input partial is clean and reliable,
-      which is not the case for mmWave measurements, as they are often noisy. As a result, the model never gets a chance to denoise the input partials. 
+      which is not the case for mmWave measurements, as they are often noisy. As a result, the model never gets a chance to denoise the input partials.
     </p>
 
     <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
@@ -522,13 +546,13 @@ window.MathJax = {
         Full reconstruct the point cloud
       </figcaption>
     </figure>
-    
+
     <h3>Density-aware Cost Function</h3>
-    
+
     <p>
       During training, we noticed the prediction point cloud tended to have uneven point density, with some regions being overly dense while others were sparse.
-      This is because the original Chamfer Distance loss used in PoinTr treats all points equally, regardless of their spatial distribution. If one area of the 
-      point cloud is too dense vs the ground truth (or too sparse), CD may not penalize it sufficiently. 
+      This is because the original Chamfer Distance loss used in PoinTr treats all points equally, regardless of their spatial distribution. If one area of the
+      point cloud is too dense vs the ground truth (or too sparse), CD may not penalize it sufficiently.
 		$$
 			\mathcal{L}=\frac{1}{|\hat{F}|}\sum_{s_i\in \hat{F}}\min_{g\in F}||s_i-g||+\frac{1}{|F|}\sum_{g\in F}\min_{s_i\in \hat{F}}||g-s_i||
 		$$
@@ -536,14 +560,14 @@ window.MathJax = {
 
     To encourage more uniform point distributions, we apply a density-aware cost function that weights points based on their local density.
     $$
-        d_{\mathrm{DCD}}(R, G) = 
+        d_{\mathrm{DCD}}(R, G) =
       \frac{1}{2} \left(
-      \frac{1}{|R|} \sum_{r \in R} 
+      \frac{1}{|R|} \sum_{r \in R}
       \left( 1 - \frac{1}{n_{\hat{g}}} e^{-\alpha \|r - \hat{g}\|_2} \right)
-      + 
-      \frac{1}{|G|} \sum_{g \in G} 
+      +
+      \frac{1}{|G|} \sum_{g \in G}
       \left( 1 - \frac{1}{n_{\hat{r}}} e^{-\alpha \|g - \hat{r}\|_2} \right)
-      \right) 
+      \right)
     $$
     where $\hat{g} = \min_{g \in G} \|r - g\|_2$ and $\hat{r} = \min_{r \in R} \|g - r\|_2$. $\alpha$ is a temperature scaler, $n_{g} = |R^g |$ and $n_{r} = |G^r |$.
     Intuitively, if a point is in a dense region (large $n_{\hat{g}}$ or $n_{\hat{r}}$), its contribution to the loss is down-weighted, encouraging the model to spread points more evenly.
@@ -557,12 +581,12 @@ window.MathJax = {
     <div class="margin-left-block"></div>
     <div class="main-content-block">
       <h1>Experiments and Results</h1>
-      <p> 
+      <p>
         To evaluate the performance of our model, we use real-world mmWave measurements of 61 objects from the MITO dataset. The dataset include daily objects with
 		    diverse properties, both material and geometric, such as wooden v.s. metal and flat v.s. curved. To further
 		    test real-world application, both line-of-sight and fully-obstructed mmWave data of each object are used.
       </p>
-      
+
       <p>
         Following prior work, we use Chamfer Distance and F-Score as the main evaluation metric. Lower CD indicates better reconstruction quality. Higher F-Score indicates better reconstruction quality. Table shows the quantitative performance of PoinTr and our model on synthetic dataset and real-world mmWave data.
       </p>
@@ -606,8 +630,8 @@ window.MathJax = {
       </figure>
 
       <p>
-        Our model outperforms PoinTr on both synthetic and real-world datasets, demonstrating the effectiveness of our modifications in adapting to mmWave data. 
-        
+        Our model outperforms PoinTr on both synthetic and real-world datasets, demonstrating the effectiveness of our modifications in adapting to mmWave data.
+
       </p>
 
 
@@ -625,7 +649,7 @@ window.MathJax = {
         the latent space using PCA. Specifically, we take the output of the transformer encoder as the latent representation of the input partial point cloud.
         Then we apply PCA to reduce the dimension to 2D for visualization. Figure shows the PCA visualization of the latent space of PoinTr (ckpt_a) and our model (ckpt_b).
       </p>
-      
+
       <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
         <img src="images/encoder_pca.png" alt="encoder_pcader_pca" style="max-width: 100%; height: auto;">
         <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
@@ -637,7 +661,7 @@ window.MathJax = {
         We also visualize the PCA analysis on the decoder output of both models. The decoder output is the set of point proxies that are used to generate the final point cloud.
         Figure shows the PCA visualization of the decoder output of PoinTr (ckpt_a) and our model (ckpt_b).
       </p>
-      
+
       <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
         <img src="images/decoder_pca.png" alt="decoder_pcader_pca" style="max-width: 100%; height: auto;">
         <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
