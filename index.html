@@ -554,36 +554,39 @@ window.MathJax = {
 
     <h3>Full Reconstruction</h3>
     <p>
-      Next, we modify the architecture of PoinTr. Originally, given a partial point cloud, PoinTr predicts the missing part and directly
-      concatenates the prediction with the input partial to produce the final output. However, this design assumes that the input partial is clean and reliable,
-      which is not the case for mmWave measurements, as they are often noisy. As a result, the model never gets a chance to denoise the input partials.
+      The original PoinTr architecture predicts only the missing part of the point cloud and then concatenates the predicted
+      completion with the input partial to form the final output. This design assumes that the input partial is relatively
+      clean and reliable. For mmWave data, however, the partial observations are often very noisy and contain spurious
+      reflections. As a result, PoinTr model never has an opportunity to reinterpret and denoise the input partial. 
     </p>
 
     <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
       <img src="images/use_origianl_input.png" alt="use_origianl_input" style="max-width: 100%; height: auto;">
       <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-        Original PoinTr uses the input partial directly in the final output
+        Figure 10: Original PoinTr pipeline: the noisy partial is directly concatenated with the predicted completion
       </figcaption>
     </figure>
 
     <p>
-      To address this issue, we modify the model architecture, allowing it to revisit the noisy partial inputs and predict the full point cloud directly.
-      This way, the model has the flexibility to reinterpret and denoise the input partials, rather than being constrained
-      to preserve them in the final output.
+      To address this limitation, we modify the architecture to predict the <em>entire</em> point cloud rather than just the
+      missing portion. The encoder still maps the noisy mmWave partial to a latent representation, but the decoder now outputs
+      a full reconstruction of the object. This change gives the model the flexibility to reinterpret and effectively denoise
+    the input partial, rather than being constrained to preserve it in the final output.
     </p>
 
     <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
       <img src="images/full_reconstruction.png" alt="full_reconstruction" style="max-width: 100%; height: auto;">
       <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-        Full reconstruct the point cloud
+        Figure 11: Modified architecture: the model predicts the full point cloud
       </figcaption>
     </figure>
 
     <h3>Density-aware Cost Function</h3>
 
     <p>
-      During training, we noticed that the predicted point cloud tends to have uneven point density, with some regions being overly dense while others were sparse.
-      This is because the original Chamfer Distance (CD) loss used in PoinTr treats all points equally, regardless of their spatial distribution. For reference,
+      During training, we noticed that the predicted point cloud tends to exhibit uneven point density, with some regions overly dense and others too sparse.
+      This is because the original Chamfer Distance (CD) loss used in PoinTr treats all points equally, regardless of their local spatial distribution. As a result, the model can “pile up” many points in one area
+        without being sufficiently penalized, as long as every ground-truth point is close to some predicted point and vice versa. For reference,
       the Chamfer Distance is given by
 		$$
 			\mathcal{L}=\frac{1}{|\hat{F}|}\sum_{s_i\in \hat{F}}\min_{g\in F}||s_i-g||+\frac{1}{|F|}\sum_{g\in F}\min_{s_i\in \hat{F}}||g-s_i||
