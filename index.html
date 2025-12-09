@@ -324,28 +324,48 @@ window.MathJax = {
       <h1>Introduction</h1>
 	  <hr>
       <p>
-        A point cloud is a set of discrete data points in space that, when concatenated together, can be used to represent a 3D shape or object.
-        As a result, point clouds have various roles in autonomous driving, medical imaging, robotic manipulation, and more. For example,
-        autonomous vehicles typically utilize LiDAR sensors to generate point clouds for real-time 3D perception of their environment. In particular,
-         point clouds provide precise information about the distance and shape of surrounding objects that computer vision techniques alone can't achieve.
-         In combination with semantic-processing, this information allows the vehicle to recognize when it is in a dangerous situation and decide the best
-         action to take.
+        A point cloud is a set of discrete points in 3D space that, when concatenated together, can represent the geometry of an object or scene.
+        Point clouds play a central role in autonomous driving, medical imaging, robotic manipulation, and more other applications. For example,
+        autonomous vehicles typically utilize LiDAR sensors to generate point clouds for real-time 3D perception of their environment. These
+        point clouds provide precise information about the distance and shape of surrounding objects that purely image-based techniques can't achieve.
+        Combined with semantic understanding, this information allows the vehicle to recognize potentially dangerous situations and decide the best
+        action to take.
       </p>
       <p>
-        However, despite its widespread use in multiple industries, point clouds are often incomplete due to various reasons: missing object details,
-        occlusion, sensor resolution, and more. This motivates the open-research field of 3D reconstruction where the missing regions of the incomplete
-        point clouds are recovered.
+        In practice, point clouds are often incomplete due to occlusions, limited sensor resolution, missing object parts,
+        or noise in the measurement process. This motivates the problem of <em>point cloud completion</em>, where the goal is
+        to reconstruct the full underlying 3D shape from a partial observation. Point cloud completion has become an active
+        area of research, with methods ranging from classical geometric reconstruction to modern deep learning approaches.
       </p>
       <p>
-        Another substantial research field is the application of millimeter waves, or mmWave for short. mmWaves are radio-frequency signals
+        In parallel, there has been growing interest in millimeter waves, or mmWave for short. mmWaves are radio-frequency signals
         that offer massive bandwidths for communication, which companies such as Verizon exploit for their 5G network. More interestingly to us, mmWaves can travel
-        through occlusions such as boxes, allowing us to generate point clouds of hidden objects. However, the distinct physical properties of mmWaves cause their measurements to be more sparse and noisy
-         than visible-light sensors such as LiDARS, further motivating the field of point cloud completion using different sensors.
+        through occlusions such as cardboard or fabric, allowing us to obtain point clouds of objects that are
+        partially hidden or completely occluded in the visible spectrum. However, mmWave measurements exhibit very different
+        physical characteristics from visible-light sensors: they are highly sparse, specular, and noisy, with limited angular
+        resolution. As a result, deep models trained on vision-like partial point clouds fail to generalize directly to mmWave data.
       </p>
 
+      <div class="hypothesis">
+        <b>Central hypothesis.</b><br>
+        We hypothesize that adapting point cloud completion models to mmWave sensing requires explicitly aligning the model’s
+        inductive biases with mmWave physics. Concretely, we propose that:
+        <ul>
+          <li>A physics-aware synthetic data pipeline that encodes mmWave reflection geometry,</li>
+          <li>A full-reconstruction architecture that can denoise and reinterpret noisy partial inputs, and</li>
+          <li>A density-aware loss that regularizes local point distributions</li>
+        </ul>
+        together will substantially improve reconstruction quality on real mmWave data compared to a state-of-the-art baseline
+        designed for vision-style partials.
+      </div>
+
       <p>
-        In the following sections, we build off of current state-of-the-art methods for 3D reconstruction to produce a model
-        that performs well on mmWave-generated point clouds and evaluate potential reasons that led to our results.
+        In this project, we build on PoinTr, a transformer-based point cloud completion model, and adapt it to the mmWave domain.
+        We introduce a synthetic dataset that incorporates mmWave reflection geometry, modify the architecture to predict the full
+        point cloud (rather than only the missing part), and replace the standard Chamfer Distance loss with a density-aware variant.
+        We then evaluate our model on both synthetic data and real-world mmWave measurements, analyze the learned latent
+        representations, and discuss how our findings shed light on the role of inductive bias and latent manifolds in deep
+        learning for 3D perception.
       </p>
     </div>
     <div class="margin-right-block">
@@ -415,31 +435,31 @@ window.MathJax = {
       it to the unique physical characteristics of mmWave radar signals. Below, we describe our synthetic dataset generation pipeline, architectural changes, and density-aware loss.</p>
 
 
-	  <h3>Synthetic Dataset</h3>
+	  <h3>Synthetic Dataset for mmWave-Style Partials</h3>
 	  <p>
 		To train a reconstruction network tailored to mmWave data, we create a synthetic dataset designed to mimic mmWave reflections. Our dataset consists of three publicly available 3D shape repositories:
 		<ul>
-			<li><b>OmniObject3D</b>: A large multi-view 3D dataset comprised of 6,000 scans of real objects in 190 categories.</li>
+			<li><b>OmniObject3D</b>: A large multi-view 3D dataset comprised of roughly 6,000 scans of real objects in 190 categories.</li>
       <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
         <img src="images/omniobject.png" alt="OmniObject3D Examples" style="max-width: 100%; height: auto;">
         <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-          OmniObject3D Examples
+          Figure 1: Example objects from the OmniObject3D dataset
         </figcaption>
       </figure>
-			<li><b>Toys4K-3D</b>: A dataset consisting of 4,179 3D objects in 105 categories that capture objects
-			encountered by infants and children.</li>
-      <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+			<li><b>Toys4K-3D</b>: A dataset of 4,179 3D objects in 105 categories, focusing on toys and household objects commonly
+          encountered by infants and children.</li>
+      <figure style="max-width: 500px; margin: 0 auto; text-align: center;">
         <img src="images/toys4k.png" alt="Toys4K-3D Examples" style="max-width: 100%; height: auto;">
         <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-          Toys4K-3D Examples
+          Figure 2: Example objects from the Toys4K-3D dataset
         </figcaption>
       </figure>
-			<li><b>Thingiverse (Objaverse)</b>: A subset of around 15k objects from the Thingiverse platform. Most
-			contain untextured meshes, which is useful for learning shape priors. </li>
-      <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+			<li><b>Thingiverse (Objaverse)</b>: A subset of around 15k objects from the Thingiverse platform, mostly
+          consisting of untextured meshes. These objects are useful for learning diverse shape priors. </li>
+      <figure style="max-width: 500px; margin: 0 auto; text-align: center;">
         <img src="images/thingiverse.png" alt="Thingiverse Examples" style="max-width: 100%; height: auto;">
         <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-          Thingiverse Examples
+          Figure 3: Example meshes from the Thingiverse subset
         </figcaption>
       </figure>
 		</ul>
@@ -447,15 +467,17 @@ window.MathJax = {
 
     <p>
       Existing point cloud completion models are typically trained on vision-style partials from visible-light sensors such as RGB-D cameras or LiDAR. mmWave signals, however,
-      produce sparse, specular, anisotropic reflections with significant noise and limited angular resolution. To close the domain gap, we encode mmWave physics into the training sampels.
+      produce sparse, specular, anisotropic reflections with significant noise and limited angular resolution. To close the domain gap, we encode mmWave physics into our synthetic training sampels.
     </p>
 
+    <p>
     We illustrate the preprocessing pipeline using a lion sample, assuming the radar is located above it.
+    </p>
 
-    <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
+    <figure style="max-width: 300px; margin: 0 auto; text-align: center;">
       <img src="images/complete_lion.png" alt="Lion" style="max-width: 100%; height: auto;">
       <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-        Lion
+        Figure 4: Example complete point cloud of a lion mesh
       </figcaption>
     </figure>
 
@@ -463,62 +485,69 @@ window.MathJax = {
       To embed mmWave specularity directly into these synthetic samples, we retain only the points that would (1) produce a specular return and (2) lie on the surface facing the radar.
       The first condition models the fact that mmWave reflections follow a specular law: a point is visible only if the incoming ray and reflected ray form equal angles with the
       surface normal in their shared plane. The second condition ensures the training partials only include geometry that physically “faces” the radar, since
-      mmWave sensors rarely receive energy from back-facing or oblique surfaces. In other words, we create the set of partial observations $O$ such that
-      \begin{align*}
-      O &= \left\{ s_i \in F \,\middle|\, \theta_P(s_i) < \tau ,\; V(s_i) = 1 \right\}\\\\
-      \theta_P(s_i)&=\min_{r\in P}|\arccos(n_i\cdot u_{r,i})|,\, u_{r,i}=\frac{p_r-s_i}{||p_r-s_i||}
-      \end{align*}
+      mmWave sensors rarely receive energy from back-facing or oblique surfaces.
+    </p>
+    <p>
+      Formally, we define the set of partial observations $O$ as
     </p>
 
     <p>
-      where $s_i$ is a point in the full 3D point cloud $F$ from the public datasets. $\theta_P(s_i)$ is the smallest angular mismatch
-      between $s_i$ and any sensor position in $P$, the set of of possible radar positions, where $n_i$ is the surface normal at $s_i$ and
-      $u_{r,i}$ is the unit vector pointing from $s_i$ to $p_r$. We choose the parameter $\tau$ to bound $\theta_P(s_i)$. $V(s_i)$ is 1 when $s_i$ lies on the radar facing surface and 0 otherwise.
-    </p>
+        $$
+        O = \left\{ s_i \in F \,\middle|\, \theta_P(s_i) < \tau,\, V(s_i) = 1 \right\}
+        $$
+        where $F$ is the full 3D point cloud, $s_i$ is a point in $F$, and
+        $$
+        \theta_P(s_i) = \min_{p_r \in P} \left|\arccos(n_i \cdot u_{r,i})\right|,\quad
+        u_{r,i} = \frac{p_r - s_i}{\lVert p_r - s_i \rVert_2}.
+        $$
+        Here $P$ is the set of possible radar positions, $n_i$ is the surface normal at $s_i$, $u_{r,i}$ is the unit vector pointing from $s_i$ to $p_r$, and $\tau$ is a threshold on
+        the angular mismatch. The visibility indicator $V(s_i)$ is 1 when $s_i$ lies on the radar-facing surface and 0 otherwise.
+      </p>
 
-    <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
+    <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
       <img src="images/mmwave_mask.png" alt="mmwave_mask" style="max-width: 100%; height: auto;">
       <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-        Points that produce a specular return
+        Figure 5: Points that satisfy the mmWave specular reflection condition
       </figcaption>
     </figure>
 
-    <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
+    <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
       <img src="images/los_mask.png" alt="los_mask" style="max-width: 100%; height: auto;">
       <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-        Points that lie on the surface facing the radar
+        Figure 6: Points that lie on the surface facing the radar (line-of-sight constraint)
       </figcaption>
     </figure>
 
-    <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
+    <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
       <img src="images/after_mask.png" alt="after_mask" style="max-width: 100%; height: auto;">
       <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-        Point Cloud that satisfy the two conditions
+        Figure 7: Resulting partial point cloud after applying both constraints
       </figcaption>
     </figure>
 
     <p>
-      Next, to simulate the limited resolution of mmWave radars, we remove the outlier points that are too far from their neighbors. Specifically, we cluster points based on their distance,
-      if two points are within a distance of 0.03 meters, they are considered to be in the same cluster. The clusters with fewer than 100 points are filtered out.
+      Next, to simulate the limited resolution of mmWave radars, we remove the outlier points that are too isolated from their neighbors. Specifically, we cluster points based on their Euclidean distance:
+      if two points are within 0.03 meters, they are assigned to the same cluster. Clusters with fewer than 100 points are filtered out. This step mimics the fact
+        that very small or isolated returns are often lost in real mmWave measurements.
     </p>
 
-    <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
+    <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
       <img src="images/outlier_removal.png" alt="outlier removal" style="max-width: 100%; height: auto;">
       <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-        After outlier removal
+        Figure 8: Partial point cloud after outlier removal and cluster filtering
       </figcaption>
     </figure>
 
 	  <p>
-		Finally, we inject Gaussian noise into the synthetic partial point clouds $O'$ to mimic the substantial noise present in real mmWave
-		measurements.
+		  Finally, we inject Gaussian noise into the synthetic partial point clouds $O'$ to model the substantial noise present in
+      real mmWave measurements.
 
     </p>
 
-    <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+    <figure style="max-width: 500px; margin: 0 auto; text-align: center;">
       <img src="images/gaussian_noise.png" alt="add Gaussian Noise" style="max-width: 100%; height: auto;">
       <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-        Add Gaussian noise
+        Figure 9: Synthetic mmWave-style partial with added Gaussian noise
       </figcaption>
     </figure>
 
