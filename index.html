@@ -336,7 +336,47 @@ window.MathJax = {
     <div class="main-content-block">
       <h1>Prior Work</h1>
 	  <hr>
-      talk about prior in this secion
+      <p>
+        Research on completing 3D shapes from partial point clouds spans a progression of methods, starting
+        from geometric-based algorithms and evolving towards modern deep-learning approaches.
+      </p>
+      <p>
+        A major field of geometric surface reconstruction methods are those that interpolate a point cloud using
+        the existing geometry without any additional information. For example, Delaunay-based methods exploit
+        the fact that the reconstructed triangulated surface can be formed by a subcomplex of the Delaunay triangulation, which
+        connects a set of points with non-overlapping triangles such that no point is inside the circumscribed circle within any triangle. While these
+        methods have provable geometric and topological guarantees, they require dense sampling of the desired surface which is often
+        impractical for imperfect real-world data. This limitation motivates a transition toward learning-based approaches, which aim
+        to infer missing geometry based on learned priors rather than strict analytical rules. 
+      </p>
+      <p>
+        More recently, transformer-based models such as PoinTr leverage attention mechanisms to capture the geometric relationships 
+        between points. The pipeline for PoinTr can be summarized into three key points:
+        <ol>
+          <li>
+            The point clouds in a local region are condensed into a feature vector which is called a "Point Proxy." Thus, the input point cloud is converted
+            into a sequence of Point Proxies which are then fed into the rest of the pipeline for processing. 
+          </li>
+          <li>
+            To solve point cloud completion as a set-to-set translation problem, an encoder-decoder architecture is used. Given a set of Point Proxies,
+            or partial point clouds, we wish to output a set of complete point clouds. To achieve this, the encoder maps the Point Proxies into
+            a latent space that hopefully preserves important features which the decoder uses to infer the missing points. Specifically, 
+            geometry-aware transformer blocks are used to model the pairwise geometric relations between points which are crucial for the 
+            decoder to reason about the missing regions. This allows the model to leverage the inductive biases
+          </li>
+          <li>
+            A geometry-aware transformer block models the relationships between all 
+          </li>
+
+        </ol>
+
+        
+      </p>
+
+      <p>
+        While prior models may perform well on vision-like partial point clouds, they don't generalize well to 
+        the sparse and noisy partials produced by mmWave measurements.
+      </p>
     </div>
     <div class="margin-right-block"></div>
   </div>
@@ -346,87 +386,231 @@ window.MathJax = {
     <div class="main-content-block">
       <h1>Methods & Experiments</h1>
 	  <hr>
-	  <h3>Architecture</h3>
+    <p>We use PoinTr as a backbone architecture and make the following changes:</p>
 
 
-	  <h3>Datasets</h3>
+	  <h3>Synthetic Datasets</h3>
 	  <p>
-		We utilize a variety of datasets to train our mmWave reconstruction network:
+		We make our own synthetic datasets that mimic the real world mmWave data to train our mmWave reconstruction network. It's consist of two public available 3D shape datasets:
 		<ul>
-			<li><b>OmniObject3D</b>: A large multi-view 3D dataset comprised of 6,000 scans of real objects in 190 categories.
-			</li>
+			<li><b>OmniObject3D</b>: A large multi-view 3D dataset comprised of 6,000 scans of real objects in 190 categories.</li>
+      <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+        <img src="images/omniobject.png" alt="OmniObject3D Examples" style="max-width: 100%; height: auto;">
+        <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+          OmniObject3D Examples
+        </figcaption>
+      </figure>
 			<li><b>Toys4K-3D</b>: A dataset consisting of 4,179 3D objects in 105 categories that capture objects
 			encountered by infants and children.</li>
-			<li><b>Thingiverse (Objaverse)</b>: A subset of around 3.5 million objects from the Thingiverse platform. Most
+      <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+        <img src="images/toys4k.png" alt="Toys4K-3D Examples" style="max-width: 100%; height: auto;">
+        <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+          Toys4K-3D Examples
+        </figcaption>
+      </figure>
+			<li><b>Thingiverse (Objaverse)</b>: A subset of around 15k objects from the Thingiverse platform. Most
 			contain untextured meshes, which is useful for learning shape priors. </li>
+      <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+        <img src="images/thingiverse.png" alt="Thingiverse Examples" style="max-width: 100%; height: auto;">
+        <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+          Thingiverse Examples
+        </figcaption>
+      </figure>
 		</ul>
-		To evaluate the performance of our model, we use real-world mmWave measurements of 61 objects from the YCB dataset. These objects
-		have diverse properties, both material and geometric, such as wooden v.s. metal and flat v.s. curved. To further
-		test real-world application, both line-of-sight and fully-obstructed mmWave data of each object are used.
 	  </p>
-	  <h3>Training</h3>
-	  	<p>
-        Existing reconstruction models are often trained on vision-like partials which come from visible-light sensors such as cameras or LiDAR. However, these
-        sensors have diffuse reflections and wide, uniform coverage, contrary to the specular, anisotropic, and noisy data received from mmWaves. Thus, in order to
-        shift domains and train our mmWave reconstruction network, we must first encode the physical characteristics of mmWaves into our training architecture.
-      </p>
 
-      <p>
-        First, we construct a training dataset entirely from synthetic point clouds derived from public 3D shape datasets.
-        To embed mmWave specularity directly into these synthetic samples, we retain only the points that would (1) produce a specular return and (2) lie on the surface facing the radar.
-        The first condition models the fact that mmWave reflections follow a specular law: a point is visible only if the incoming ray and reflected ray form equal angles with the
-        surface normal in their shared plane. The second condition ensures the training partials only include geometry that physically “faces” the radar, since
-        mmWave sensors rarely receive energy from back-facing or oblique surfaces. In other words, we create the set of partial observations $O$ such that
-        \begin{align*}
-        O &= \left\{ s_i \in F \,\middle|\, \theta_P(s_i) < \tau ,\; V(s_i) = 1 \right\}\\\\
-        \theta_P(s_i)&=\min_{r\in P}|\arccos(n_i\cdot u_{r,i})|,\, u_{r,i}=\frac{p_r-s_i}{||p_r-s_i||}
-        \end{align*}
-      </p>
+    <p>
+      Existing reconstruction models are often trained on vision-like partials which come from visible-light sensors such as cameras or LiDAR. However, these
+      sensors have diffuse reflections and wide, uniform coverage, contrary to the specular, anisotropic, and noisy data received from mmWaves. Thus, in order to
+      shift domains and train our mmWave reconstruction network, we must first encode the physical characteristics of mmWaves into our training architecture. Here we use the point cloud of a lion with radar at the top as an example to demonstrate our preprocessing pipeline.
+    </p>
 
-      <p>
-        where $s_i$ is a point in the full 3D point cloud $F$ from the public datasets. $\theta_P(s_i)$ is the smallest angular mismatch
-        between $s_i$ and any sensor position in $P$, the set of of possible radar positions, where $n_i$ is the surface normal at $s_i$ and
-        $u_{r,i}$ is the unit vector pointing from $s_i$ to $p_r$. We choose the parameter $\tau$ to bound $\theta_P(s_i)$. $V(s_i)$ is 1 when $s_i$ lies on the radar facing surface and 0 otherwise.
-      </p>
+    <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
+      <img src="images/complete_lion.png" alt="Lion" style="max-width: 100%; height: auto;">
+      <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+        Lion
+      </figcaption>
+    </figure>
 
-      <p>
-        Next, we further refine the specular partials by keeping only those points that exhibit anisotropic behavior, which captures the
-        fact that mmWave measurements vary with the angle of incidence and the corresponding reflection strength of each surface.
+    <p>
+      To embed mmWave specularity directly into these synthetic samples, we retain only the points that would (1) produce a specular return and (2) lie on the surface facing the radar.
+      The first condition models the fact that mmWave reflections follow a specular law: a point is visible only if the incoming ray and reflected ray form equal angles with the
+      surface normal in their shared plane. The second condition ensures the training partials only include geometry that physically “faces” the radar, since
+      mmWave sensors rarely receive energy from back-facing or oblique surfaces. In other words, we create the set of partial observations $O$ such that
+      \begin{align*}
+      O &= \left\{ s_i \in F \,\middle|\, \theta_P(s_i) < \tau ,\; V(s_i) = 1 \right\}\\\\
+      \theta_P(s_i)&=\min_{r\in P}|\arccos(n_i\cdot u_{r,i})|,\, u_{r,i}=\frac{p_r-s_i}{||p_r-s_i||}
+      \end{align*}
+    </p>
 
-        To model this behavior, we construct a reflection-dependent visibility filter that selects surface points according
-        to physical constraints on incidence angle and material reflectivity. In other words, we produce the set $O'$ such that
-        \begin{align*}
-          O'=\{s_i\in O\;|\;\theta_H&(n_i)<\tau_H,\;\theta_V(n_i)<\tau_V\}\\\\
-          \theta_H=|\arccos&(n_i\cdot\begin{bmatrix}1&0&0\end{bmatrix})|\\\\
-          \theta_V=|\arccos&(n_i\cdot\begin{bmatrix}0&1&0\end{bmatrix})|
-        \end{align*}
-      </p>
+    <p>
+      where $s_i$ is a point in the full 3D point cloud $F$ from the public datasets. $\theta_P(s_i)$ is the smallest angular mismatch
+      between $s_i$ and any sensor position in $P$, the set of of possible radar positions, where $n_i$ is the surface normal at $s_i$ and
+      $u_{r,i}$ is the unit vector pointing from $s_i$ to $p_r$. We choose the parameter $\tau$ to bound $\theta_P(s_i)$. $V(s_i)$ is 1 when $s_i$ lies on the radar facing surface and 0 otherwise.
+    </p>
 
-      <p>
-        where $\theta_H$ and $\theta_V$ are the angles of the horizontal and vertical specular returns from the point $s_i$. $\tau_H$ and $\tau_V$
-		are parameters that we choose to simulate different material properties.
-      </p>
+    <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
+      <img src="images/mmwave_mask.png" alt="mmwave_mask" style="max-width: 100%; height: auto;">
+      <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+        Points that produce a specular return
+      </figcaption>
+    </figure>
+
+    <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
+      <img src="images/los_mask.png" alt="los_mask" style="max-width: 100%; height: auto;">
+      <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+        Points that lie on the surface facing the radar
+      </figcaption>
+    </figure>
+
+    <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
+      <img src="images/after_mask.png" alt="after_mask" style="max-width: 100%; height: auto;">
+      <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+        Point Cloud that satisfy the two conditions
+      </figcaption>
+    </figure>
+
+    <p>
+      Next, to simulate the limited resolution of mmWave radars, we remove the outlier points that are too far from their neighbors. Specifically, we cluster points based on their distance,
+      if two points are within a distance of 0.03 meters, they are considered to be in the same cluster. The clusters with fewer than 100 points are filtered out.
+    </p>
+
+    <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
+      <img src="images/outlier_removal.png" alt="outlier removal" style="max-width: 100%; height: auto;">
+      <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+        After outlier removal
+      </figcaption>
+    </figure>
 
 	  <p>
 		Finally, we inject Gaussian noise into the synthetic partial point clouds $O'$ to mimic the substantial noise present in real mmWave
-		measurements. To ensure the model learns both to denoise and complete these inputs, we replace the concatenation-based loss that
-		PoinTr uses with the bi-directional Chamfer Distance between the model's predicted point cloud $\hat{F}$ and the ground-truth $F$.
+		measurements. 
+
+    </p>
+
+    <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+      <img src="images/gaussian_noise.png" alt="add Gaussian Noise" style="max-width: 100%; height: auto;">
+      <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+        Add Gaussian noise
+      </figcaption>
+    </figure>
+
+
+    <h3>Full Reconstruction</h3>
+    <p>
+      The second change we make is the architecture of PoinTr. Originally, given a partial point cloud, PoinTr predicts the missing part and directly
+      concatenate the prediction with the input partial to form the final output. However, this design assumes that the input partial is clean and reliable,
+      which is not the case for mmWave measurements, as they are often noisy. As a result, the model never gets a chance to denoise the input partials. 
+    </p>
+
+    <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+      <img src="images/use_origianl_input.png" alt="use_origianl_input" style="max-width: 100%; height: auto;">
+      <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+        Original PoinTr uses the input partial directly in the final output
+      </figcaption>
+    </figure>
+
+    <p>
+      To address this issue, we modify the model architecture, allowing it revisit the noisy partial input and predict the full point cloud directly.
+      This way, the model has the flexibility to reinterpret and denoise the input partials, rather than being constrained
+      to preserve them in the final output.
+    </p>
+
+    <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+      <img src="images/full_reconstruction.png" alt="full_reconstruction" style="max-width: 100%; height: auto;">
+      <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+        Full reconstruct the point cloud
+      </figcaption>
+    </figure>
+    
+    <h3>Density-aware Cost Function</h3>
+    
+    <p>
+      During training, we noticed the prediction point cloud tended to have uneven point density, with some regions being overly dense while others were sparse.
+      This is because the original Chamfer Distance loss used in PoinTr treats all points equally, regardless of their spatial distribution. If one area of the 
+      point cloud is too dense vs the ground truth (or too sparse), CD may not penalize it sufficiently. 
 		$$
 			\mathcal{L}=\frac{1}{|\hat{F}|}\sum_{s_i\in \hat{F}}\min_{g\in F}||s_i-g||+\frac{1}{|F|}\sum_{g\in F}\min_{s_i\in \hat{F}}||g-s_i||
 		$$
-		Intuitively, the bi-directional Chamfer Distance measures how far the predicted shape is from the true shape in both directions:
-		every predicted point must lie close to some ground-truth point and every ground-truth point must be close to some predicted point.
-		This encourages the model to reinterpret the noisy inputs rather than preserve them, allowing it to output a fully denoised and complete
-		point cloud $\hat{F}$.
+    where $\hat{F}$ is the predicted full point cloud and $F$ is the ground-truth full point cloud.
+
+    To encourage more uniform point distributions, we apply a density-aware cost function that weights points based on their local density.
+    $$
+        d_{\mathrm{DCD}}(R, G) = 
+      \frac{1}{2} \left(
+      \frac{1}{|R|} \sum_{r \in R} 
+      \left( 1 - \frac{1}{n_{\hat{g}}} e^{-\alpha \|r - \hat{g}\|_2} \right)
+      + 
+      \frac{1}{|G|} \sum_{g \in G} 
+      \left( 1 - \frac{1}{n_{\hat{r}}} e^{-\alpha \|g - \hat{r}\|_2} \right)
+      \right) 
+    $$
+    where $\hat{g} = \min_{g \in G} \|r - g\|_2$ and $\hat{r} = \min_{r \in R} \|g - r\|_2$. $\alpha$ is a temperature scaler, $n_{g} = |R^g |$ and $n_{r} = |G^r |$.
+    Intuitively, if a point is in a dense region (large $n_{\hat{g}}$ or $n_{\hat{r}}$), its contribution to the loss is down-weighted, encouraging the model to spread points more evenly.
 
 	  </p>
+    </div>
+    <div class="margin-right-block"></div>
+  </div>
 
-      <b>TODO:</b>*maybe a paragraph explaining why we can use synthetic data?
+  <div class="content-margin-container" id="discussion">
+    <div class="margin-left-block"></div>
+    <div class="main-content-block">
+      <h1>Experiments and Results</h1>
+      <p> 
+        To evaluate the performance of our model, we use real-world mmWave measurements of 61 objects from the MITO dataset. The dataset include daily objects with
+		    diverse properties, both material and geometric, such as wooden v.s. metal and flat v.s. curved. To further
+		    test real-world application, both line-of-sight and fully-obstructed mmWave data of each object are used.
+      </p>
+      
+      <p>
+        Following prior work, we use Chamfer Distance and F-Score as the main evaluation metric. Lower CD indicates better reconstruction quality. Higher F-Score indicates better reconstruction quality. Table shows the quantitative performance of PoinTr and our model on synthetic dataset and real-world mmWave data.
+      </p>
 
-	  <p>
+      <table border="1" cellpadding="8" cellspacing="0">
+        <tr>
+          <th rowspan="2"></th>
+          <th colspan="2">Synthetic Dataset</th>
+          <th colspan="2">Real World Dataset</th>
+        </tr>
 
-	  </p>
-	  <h3>Evaluation</h3>
+        <tr>
+          <th>Chamfer Distance</th>
+          <th>F-Score</th>
+          <th>Chamfer Distance</th>
+          <th>F-Score</th>
+        </tr>
+
+        <tr>
+          <th>PoinTr</th>
+          <td>0.071</td>
+          <td>70%</td>
+          <td>0.104</td>
+          <td>62%</td>
+        </tr>
+
+        <tr>
+          <th>Our Model</th>
+          <td>0.034</td>
+          <td>91%</td>
+          <td>0.069</td>
+          <td>75%</td>
+        </tr>
+      </table>
+
+      <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+        <img src="images/visualization.png" alt="visualization" style="max-width: 100%; height: auto;">
+        <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+          Qualitative Comparison between PoinTr and Our Model
+        </figcaption>
+      </figure>
+
+      <p>
+        Our model outperforms PoinTr on both synthetic and real-world datasets, demonstrating the effectiveness of our modifications in adapting to mmWave data. 
+        
+      </p>
+
+
     </div>
     <div class="margin-right-block"></div>
   </div>
@@ -436,7 +620,36 @@ window.MathJax = {
     <div class="main-content-block">
       <h1>Discussion</h1>
 	  <hr>
-      results
+      <p>
+        We further inverstigate why our model outperforms PoinTr by analyzing the latent space of both models. We visualize
+        the latent space using PCA. Specifically, we take the output of the transformer encoder as the latent representation of the input partial point cloud.
+        Then we apply PCA to reduce the dimension to 2D for visualization. Figure shows the PCA visualization of the latent space of PoinTr (ckpt_a) and our model (ckpt_b).
+      </p>
+      
+      <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+        <img src="images/encoder_pca.png" alt="encoder_pcader_pca" style="max-width: 100%; height: auto;">
+        <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+          PCA Analysis on Encoder Output
+        </figcaption>
+      </figure>
+
+      <p>
+        We also visualize the PCA analysis on the decoder output of both models. The decoder output is the set of point proxies that are used to generate the final point cloud.
+        Figure shows the PCA visualization of the decoder output of PoinTr (ckpt_a) and our model (ckpt_b).
+      </p>
+      
+      <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
+        <img src="images/decoder_pca.png" alt="decoder_pcader_pca" style="max-width: 100%; height: auto;">
+        <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
+          PCA Analysis on Decoder Output
+        </figcaption>
+      </figure>
+
+      <p>
+        As shown in both figures, our model maps each object into different regions in the latent space, indicating that the model learns to distinguish different objects effectively.
+        In contrast, PoinTr's latent space shows significant overlap among different objects, suggesting that it struggles to differentiate between them. This improved separation in the latent space likely contributes to our model's
+        superior reconstruction performance on mmWave data.
+      </p>
     </div>
     <div class="margin-right-block"></div>
   </div>
