@@ -325,7 +325,7 @@ window.MathJax = {
 	  <hr>
       <p>
         A point cloud is a set of discrete points in 3D space that, when concatenated together, can represent the geometry of an object or scene.
-        Point clouds play a central role in autonomous driving, medical imaging, robotic manipulation, and more other applications. For example,
+        Point clouds play a central role in autonomous driving, medical imaging, robotic manipulation, and other applications. For example,
         autonomous vehicles typically utilize LiDAR sensors to generate point clouds for real-time 3D perception of their environment. These
         point clouds provide precise information about the distance and shape of surrounding objects that purely image-based techniques can't achieve.
         Combined with semantic understanding, this information allows the vehicle to recognize potentially dangerous situations and decide the best
@@ -349,7 +349,7 @@ window.MathJax = {
       <div class="hypothesis">
         <b>Central hypothesis.</b><br>
         We hypothesize that adapting point cloud completion models to mmWave sensing requires explicitly aligning the model’s
-        inductive biases with mmWave physics. Concretely, we propose that:
+        inductive biases with mmWave physics. Concretely, we propose that
         <ul>
           <li>A physics-aware synthetic data pipeline that encodes mmWave reflection geometry,</li>
           <li>A full-reconstruction architecture that can denoise and reinterpret noisy partial inputs, and</li>
@@ -379,7 +379,7 @@ window.MathJax = {
       <h1>Prior Work</h1>
 	  <hr>
       <p>
-        Research on completing 3D shapes from partial point clouds spans a progression of methods, starting
+        Research on completing 3D shapes from partial point clouds spans a progression of methods, beginning
         from geometric-based algorithms and evolving towards modern deep-learning approaches.
       </p>
       <p>
@@ -467,7 +467,7 @@ window.MathJax = {
 
     <p>
       Existing point cloud completion models are typically trained on vision-style partials from visible-light sensors such as RGB-D cameras or LiDAR. mmWave signals, however,
-      produce sparse, specular, anisotropic reflections with significant noise and limited angular resolution. To close the domain gap, we encode mmWave physics into our synthetic training sampels.
+      produce sparse, specular, anisotropic reflections with significant noise and limited angular resolution. To close the domain gap, we encode mmWave physics into our synthetic training samples.
     </p>
 
     <p>
@@ -554,8 +554,8 @@ window.MathJax = {
 
     <h3>Full Reconstruction</h3>
     <p>
-      The second change we make is the architecture of PoinTr. Originally, given a partial point cloud, PoinTr predicts the missing part and directly
-      concatenate the prediction with the input partial to form the final output. However, this design assumes that the input partial is clean and reliable,
+      Next, we modify the architecture of PoinTr. Originally, given a partial point cloud, PoinTr predicts the missing part and directly
+      concatenates the prediction with the input partial to produce the final output. However, this design assumes that the input partial is clean and reliable,
       which is not the case for mmWave measurements, as they are often noisy. As a result, the model never gets a chance to denoise the input partials.
     </p>
 
@@ -567,7 +567,7 @@ window.MathJax = {
     </figure>
 
     <p>
-      To address this issue, we modify the model architecture, allowing it revisit the noisy partial input and predict the full point cloud directly.
+      To address this issue, we modify the model architecture, allowing it to revisit the noisy partial inputs and predict the full point cloud directly.
       This way, the model has the flexibility to reinterpret and denoise the input partials, rather than being constrained
       to preserve them in the final output.
     </p>
@@ -582,13 +582,14 @@ window.MathJax = {
     <h3>Density-aware Cost Function</h3>
 
     <p>
-      During training, we noticed the prediction point cloud tended to have uneven point density, with some regions being overly dense while others were sparse.
-      This is because the original Chamfer Distance loss used in PoinTr treats all points equally, regardless of their spatial distribution. If one area of the
-      point cloud is too dense vs the ground truth (or too sparse), CD may not penalize it sufficiently.
+      During training, we noticed that the predicted point cloud tends to have uneven point density, with some regions being overly dense while others were sparse.
+      This is because the original Chamfer Distance (CD) loss used in PoinTr treats all points equally, regardless of their spatial distribution. For reference,
+      the Chamfer Distance is given by
 		$$
 			\mathcal{L}=\frac{1}{|\hat{F}|}\sum_{s_i\in \hat{F}}\min_{g\in F}||s_i-g||+\frac{1}{|F|}\sum_{g\in F}\min_{s_i\in \hat{F}}||g-s_i||
 		$$
-    where $\hat{F}$ is the predicted full point cloud and $F$ is the ground-truth full point cloud.
+    where $\hat{F}$ is the predicted full point cloud and $F$ is the ground-truth full point cloud. If one area of the
+      point cloud is too dense (or sparse) vs the ground truth, then CD may not penalize it sufficiently.
 
     To encourage more uniform point distributions, we apply a density-aware cost function that weights points based on their local density.
     $$
@@ -737,33 +738,34 @@ window.MathJax = {
     <div class="main-content-block">
       <h1>Conclusion</h1>
 	  <hr>
-      <q>
-        In this project, we set out to adapt state-of-the-art point cloud completion techniques to the fundamentally different sensing regime of mmWave radar. Unlike vision-based sensors,
+      <p>
+        In this project, we attempted to adapt state-of-the-art point cloud completion techniques to the fundamentally different sensing regime of mmWave radar. Unlike vision-based sensors,
         mmWave systems generate highly sparse, noisy, and specular measurements, making direct application of existing models ineffective. To address this challenge, we introduced a physics-aware
         synthetic data pipeline, a full-reconstruction architecture that enables implicit denoising, and a density-aware loss that promotes more uniform point distributions.
-
-        Through extensive experiments on both synthetic data and real-world measurements from the MITO dataset, our model consistently outperforms PoinTr across Chamfer Distance and F-Score metrics.
+      </p>
+      <p>
+        Through experimentation on both synthetic data and real-world measurements from the MITO dataset, our model consistently outperforms PoinTr across Chamfer Distance and F-Score metrics.
         Qualitative results further demonstrate improved geometric fidelity, especially in cases where mmWave sparsity is severe. Latent-space analysis suggests that our architectural changes lead to
         more structured and discriminative feature representations, enabling the model to better distinguish object categories and infer missing geometry.
 
         Beyond performance gains, this work contributes to the broader understanding of deep learning in several ways:
         <ul>
-          <li>It highlights the importance of incorporating domain-specific physics into data generation and model design, rather than relying solely on generic architectures.</li>
+          <li>It highlights the importance of incorporating domain-specific inductive biases into data generation and model design, rather than relying solely on generic architectures.</li>
 
-          <li>It provides a concrete demonstration of how deep learning models behave under severe domain shift: models trained on vision-like data fail to generalize to mmWave inputs, whereas models equipped with the appropriate inductive biases can successfully transfer across sensing modalities.</li>
+          <li>It demonstrates how deep learning models behave under severe domain shift: models trained on vision-like data fail to generalize to mmWave inputs, whereas models equipped with the appropriate inductive biases can successfully transfer across sensing modalities.</li>
 
           <li>It illustrates that architectural and loss-function choices directly reshape the latent manifold: by enforcing full reconstruction and density-aware optimization, the model learns latent clusters that better reflect object categories and geometric relationships.</li>
 
-          <li>It reinforces the broader understanding that deep learning is not just about scaling data or model size; rather, the alignment between data characteristics, sensor physics, and model assumptions fundamentally determines the quality of learned representations.</li>
+          <li>It reinforces the broader understanding that deep learning is not just about scaling data or model size. Rather, the practice of producing meaningful datasets that capture our domain-specific properties is underscored.  </li>
         </ul>
 
 
-        While our approach significantly improves reconstruction quality, challenges remain, especially for small or irregular objects that produce weak mmWave returns. Future work may integrate richer
+        While our approach significantly improves reconstruction quality in comparison to PoinTr, challenges remain, especially for small or irregular objects that produce weak mmWave returns. Future work may integrate richer
         generative priors, differentiable radar simulation, or multi-sensor fusion to further enhance robustness.
 
-        Overall, our findings underscore a key lesson: deep learning models are not merely pattern matchers but systems whose effectiveness depends critically on the inductive biases we embed into their data, architecture, and objectives. By aligning these biases with the physics of mmWave sensing,
+        Overall, our findings demonstrate how the effectiveness of deep learning models depends critically on the inductive biases we embed into their data, architecture, and objectives. By aligning these biases with the physics of mmWave sensing,
         we move toward reliable 3D perception beyond the domain of traditional vision sensors.
-      </q>
+      </p>
     </div>
     <div class="margin-right-block"></div>
   </div>
