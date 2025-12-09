@@ -32,7 +32,6 @@ window.MathJax = {
     color: #24b597;
   }
 
-  /* Main page layout: centered content with a left sidebar outline */
 
   .content-margin-container {
     display: flex;
@@ -40,17 +39,17 @@ window.MathJax = {
     justify-content: center;
     align-items: flex-start;
     box-sizing: border-box;
-    margin-bottom: 16px; /* reduced spacing */
+    margin-bottom: 0px;
   }
 
   .main-content-block {
     width: 60%;
     max-width: 900px;
     box-sizing: border-box;
-    padding: 0 12px;   /* reduced from 16px */
+    padding: 0 12px;
     background-color: #ffffff;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 0px;
+    margin-bottom: 0px;
   }
 
   .margin-left-block {
@@ -66,11 +65,10 @@ window.MathJax = {
     width: 220px;
     max-width: 220px;
     box-sizing: border-box;
-    padding: 0 6px; /* reduced */
+    padding: 0 6px;
     color: #555;
   }
 
-  /* Keep the outline as a fixed left sidebar like the original */
 
   #intro .margin-left-block {
     position: fixed;
@@ -79,7 +77,6 @@ window.MathJax = {
     max-width: 180px;
   }
 
-  /* Make sure other sections don't shift from the fixed outline width */
   #prior_work .margin-left-block,
   #methods .margin-left-block,
   #discussion .margin-left-block,
@@ -89,7 +86,7 @@ window.MathJax = {
   }
 
   .main-content-block.header-block {
-    margin-top: 20px; /* was 40px */
+    margin-top: 20px;
     margin-bottom: 0px;
   }
 
@@ -110,8 +107,8 @@ window.MathJax = {
 
   h1 {
     font-size: 28px;
-    margin-top: 20px;  /* reduced */
-    margin-bottom: 8px; /* reduced */
+    margin-top: 20px;
+    margin-bottom: 8px;
     font-weight: 600;
   }
 
@@ -136,7 +133,7 @@ window.MathJax = {
 
   p {
     margin-top: 6px;
-    margin-bottom: 6px; /* tighter paragraphs */
+    margin-bottom: 6px;
   }
 
   .mathjax-mobile, .mathml-non-mobile { display: none; }
@@ -151,7 +148,7 @@ window.MathJax = {
     height: 1px;
     border: none;
     background-color: #ddd;
-    margin: 12px 0; /* reduced */
+    margin: 0px 0;
     max-width: 900px;
   }
 
@@ -164,14 +161,14 @@ window.MathJax = {
     font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: 16px;
     text-align: center;
-    margin: 16px auto; /* reduced */
-    padding: 12px; /* reduced */
+    margin: 16px auto;
+    padding: 12px;
   }
 
   div.citation {
     font-size: 0.9em;
     background-color:#fff;
-    padding: 6px; /* reduced */
+    padding: 6px;
     border-top: 1px solid #eee;
   }
 
@@ -251,14 +248,14 @@ window.MathJax = {
   .project-header {
     display: flex;
     flex-direction: column;
-    gap: 2px; /* reduced */
+    gap: 2px;
     padding-bottom: 4px;
   }
 
   .project-header .title-line {
-    font-size: 32px;
+    font-size: 24px;
     font-family: 'Courier New', Courier, monospace;
-    margin-bottom: 2px; /* reduced */
+    margin-bottom: 0px;
   }
 
   .project-header .authors {
@@ -271,7 +268,12 @@ window.MathJax = {
 
   .project-header .subtitle {
     font-size: 18px;
-    margin-top: 0px; /* reduced */
+    margin-top: 0px;
+  }
+
+  table {
+    margin-left: auto;
+    margin-right: auto;
   }
 
 </style>
@@ -283,14 +285,12 @@ window.MathJax = {
 
 <body>
 
-  <!-- Header / title block -->
   <div class="content-margin-container">
     <div class="margin-left-block">
-      <!-- empty here, outline lives in intro block -->
     </div>
     <div class="main-content-block header-block">
       <div class="project-header">
-		<div class="title-line">mmWave 3D Reconstruction</div>
+		<div class="title-line">Switching Domains: mmWave 3D Reconstruction</div>
 		<div class="authors">
 			<a href="your_website">Christopher Liem</a>
 			and
@@ -369,7 +369,6 @@ window.MathJax = {
       </p>
     </div>
     <div class="margin-right-block">
-      Margin note that clarifies some detail #main-content-block for intro section.
     </div>
   </div>
 
@@ -488,19 +487,19 @@ window.MathJax = {
       mmWave sensors rarely receive energy from back-facing or oblique surfaces.
     </p>
     <p>
-      Formally, we define the set of partial observations $O$ as
+      Formally, we define the set of partial observations $\mathcal{P}_\text{obs} $ as
     </p>
 
     <p>
         $$
-        O = \left\{ s_i \in F \,\middle|\, \theta_P(s_i) < \tau,\, V(s_i) = 1 \right\}
+        \mathcal{P}_{\text{obs}} = \left\{ s_i \in \mathcal{P}_\text{full} \,\middle|\, \theta_R(s_i) < \gamma,\; V(s_i) = 1 \right\}
         $$
-        where $F$ is the full 3D point cloud, $s_i$ is a point in $F$, and
+        where $\mathcal{P}_\text{full}$ is the full 3D point cloud, $s_i$ is a sample point in $\mathcal{P}_\text{full}$, and
         $$
-        \theta_P(s_i) = \min_{p_r \in P} \left|\arccos(n_i \cdot u_{r,i})\right|,\quad
-        u_{r,i} = \frac{p_r - s_i}{\lVert p_r - s_i \rVert_2}.
+        \theta_R(s_i) = \min_{r \in R} \left|\arccos(n_i \cdot u_{r,i})\right|,\quad
+        u_{r,i} = \frac{r - s_i}{\lVert r - s_i \rVert_2}.
         $$
-        Here $P$ is the set of possible radar positions, $n_i$ is the surface normal at $s_i$, $u_{r,i}$ is the unit vector pointing from $s_i$ to $p_r$, and $\tau$ is a threshold on
+        Here $R$ is the set of possible radar positions, $n_i$ is the surface normal at $s_i$, $u_{r,i}$ is the unit vector pointing from $s_i$ to $r$, and $\gamma$ is a threshold on
         the angular mismatch. The visibility indicator $V(s_i)$ is 1 when $s_i$ lies on the radar-facing surface and 0 otherwise.
       </p>
 
@@ -521,12 +520,12 @@ window.MathJax = {
     <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
       <img src="images/after_mask.png" alt="after_mask" style="max-width: 100%; height: auto;">
       <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-        Figure 7: Resulting partial point cloud after applying both constraints
+        Figure 7: Resulting partial point cloud after applying both constraints ($\mathcal{P}_\text{obs}$)
       </figcaption>
     </figure>
 
     <p>
-      Next, to simulate the limited resolution of mmWave radars, we remove the outlier points that are too isolated from their neighbors. Specifically, we cluster points based on their Euclidean distance:
+      Next, to simulate the limited resolution of mmWave radars, we remove the outlier points that are too isolated from their neighbors to produce $\mathcal{P}_\text{obs}'$. Specifically, we cluster points based on their Euclidean distance:
       if two points are within 0.03 meters, they are assigned to the same cluster. Clusters with fewer than 100 points are filtered out. This step mimics the fact
         that very small or isolated returns are often lost in real mmWave measurements.
     </p>
@@ -534,12 +533,12 @@ window.MathJax = {
     <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
       <img src="images/outlier_removal.png" alt="outlier removal" style="max-width: 100%; height: auto;">
       <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-        Figure 8: Partial point cloud after outlier removal and cluster filtering
+        Figure 8: Partial point cloud after outlier removal and cluster filtering ($\mathcal{P}_\text{obs}'$)
       </figcaption>
     </figure>
 
 	  <p>
-		  Finally, we inject Gaussian noise into the synthetic partial point clouds $O'$ to model the substantial noise present in
+		  Finally, we inject Gaussian noise into the synthetic partial point clouds $\mathcal{P}_\text{obs}'$ to produce $\mathcal{P}_\text{obs}''$, modeling the substantial noise present in
       real mmWave measurements.
 
     </p>
@@ -547,7 +546,7 @@ window.MathJax = {
     <figure style="max-width: 500px; margin: 0 auto; text-align: center;">
       <img src="images/gaussian_noise.png" alt="add Gaussian Noise" style="max-width: 100%; height: auto;">
       <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
-        Figure 9: Synthetic mmWave-style partial with added Gaussian noise
+        Figure 9: Synthetic mmWave-style partial with added Gaussian noise ($\mathcal{P}_\text{obs}''$)
       </figcaption>
     </figure>
 
@@ -589,23 +588,23 @@ window.MathJax = {
         without being sufficiently penalized, as long as every ground-truth point is close to some predicted point and vice versa. For reference,
       the Chamfer Distance is given by
 		$$
-			\mathcal{L}=\frac{1}{|\hat{F}|}\sum_{s_i\in \hat{F}}\min_{g\in F}||s_i-g||+\frac{1}{|F|}\sum_{g\in F}\min_{s_i\in \hat{F}}||g-s_i||
+			\text{CD}=\frac{1}{|\mathcal{P}_\text{pred}|}\sum_{p\in \mathcal{P}_\text{pred}}\min_{g\in \mathcal{P}_\text{full}}||p-g||+\frac{1}{|\mathcal{P}_\text{full}|}\sum_{g\in \mathcal{P}_\text{full}}\min_{p\in \mathcal{P}_\text{pred}}||g-p||
 		$$
-    where $\hat{F}$ is the predicted full point cloud and $F$ is the ground-truth full point cloud. If one area of the
+    where $\mathcal{P}_\text{pred}$ is the predicted full point cloud and $\mathcal{P}_\text{full}$ is the ground-truth full point cloud. If one area of the
       point cloud is too dense (or sparse) vs the ground truth, then CD may not penalize it sufficiently.
 
     To encourage more uniform point distributions, we apply a density-aware cost function that weights points based on their local density.
     $$
-        d_{\mathrm{DCD}}(R, G) =
+        d_{\mathrm{DCD}}(\mathcal{P}_\text{pred}, \mathcal{P}_\text{full}) =
       \frac{1}{2} \left(
-      \frac{1}{|R|} \sum_{r \in R}
-      \left( 1 - \frac{1}{n_{\hat{g}}} e^{-\alpha \|r - \hat{g}\|_2} \right)
+      \frac{1}{|\mathcal{P}_\text{pred}|} \sum_{p \in \mathcal{P}_\text{pred}}
+      \left( 1 - \frac{1}{n_{\hat{g}}} e^{-\alpha \|p - \hat{g}\|_2} \right)
       +
-      \frac{1}{|G|} \sum_{g \in G}
-      \left( 1 - \frac{1}{n_{\hat{r}}} e^{-\alpha \|g - \hat{r}\|_2} \right)
+      \frac{1}{|\mathcal{P}_\text{full}|} \sum_{g \in \mathcal{P}_\text{full}}
+      \left( 1 - \frac{1}{n_{\hat{p}}} e^{-\alpha \|g - \hat{p}\|_2} \right)
       \right)
     $$
-    where $\hat{g} = \min_{g \in G} \|r - g\|_2$ and $\hat{r} = \min_{r \in R} \|g - r\|_2$. $\alpha$ is a temperature scaler, $n_{g} = |R^g |$ and $n_{r} = |G^r |$.
+    where $\hat{g} = \min_{g \in \mathcal{P}_\text{full}} \|p - g\|_2$ and $\hat{p} = \min_{p \in \mathcal{P}_\text{pred}} \|g - p\|_2$. $\alpha$ is a temperature scaler, $n_{g} = |\mathcal{P}_\text{pred}^g |$ and $n_{p} = |\mathcal{P}_\text{full}^p |$.
     Intuitively, if a point is in a dense region (large $n_{\hat{g}}$ or $n_{\hat{r}}$), its contribution to the loss is down-weighted, encouraging the model to spread points more evenly.
 
 	  </p>
@@ -636,7 +635,7 @@ window.MathJax = {
 	  <hr>
     <h3>Results</h3>
     <p>
-        Following prior work, we use Chamfer Distance and F-Score as the main evaluation metric. Lower CD indicates better reconstruction quality. Higher F-Score indicates better reconstruction quality. Table shows the quantitative performance of PoinTr and our model on synthetic dataset and real-world mmWave data.
+        Following prior work, we use Chamfer Distance and F-Score as the main evaluation metric. Lower CD indicates better reconstruction quality while higher F-Score indicates better reconstruction quality. The table below shows the quantitative performance of PoinTr and our model on a synthetic dataset and real-world mmWave data.
       </p>
 
       <table border="1" cellpadding="8" cellspacing="0">
@@ -669,7 +668,10 @@ window.MathJax = {
           <td>75%</td>
         </tr>
       </table>
-
+      <p>
+      Our model's outputs have lower CD and higher F-Score than PoinTr, proving that it has superior quantitative performance on mmWave inputs. Qualitatively, we visualize
+      PoinTr and our model's completed point clouds in comparison to the ground-truth in the figure below.
+      </p>
       <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
         <img src="images/visualization.png" alt="visualization" style="max-width: 100%; height: auto;">
         <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
@@ -678,13 +680,13 @@ window.MathJax = {
       </figure>
 
       <p>
-        Our model outperforms PoinTr on both synthetic and real-world datasets, demonstrating the effectiveness of our modifications in adapting to mmWave data.
+        The partial point clouds
 
       </p>
+      <h3>Latent Representation</h3>
       <p>
-        We further inverstigate why our model outperforms PoinTr by analyzing the latent space of both models. We visualize
-        the latent space using PCA. Specifically, we take the output of the transformer encoder as the latent representation of the input partial point cloud.
-        Then we apply PCA to reduce the dimension to 2D for visualization. Figure shows the PCA visualization of the latent space of PoinTr (ckpt_a) and our model (ckpt_b).
+        We investigate why our model outperforms PoinTr by analyzing the latent space of both models on different objects. To achieve this, we visualize the latent features using principal component analysis (PCA). Specifically, we take the output of the transformer's encoder as the latent representation of the input partial point cloud.
+        Then, we apply PCA to reduce the dimension to 2D for visualization. Figure shows the PCA visualization of the latent space of PoinTr (ckpt_a) and our model (ckpt_b).
       </p>
 
       <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
@@ -707,11 +709,18 @@ window.MathJax = {
       </figure>
 
       <p>
-        As shown in both figures, our model maps each object into different regions in the latent space, indicating that the model learns to distinguish different objects effectively.
-        In contrast, PoinTr's latent space shows significant overlap among different objects, suggesting that it struggles to differentiate between them. This improved separation in the latent space likely contributes to our model's
-        superior reconstruction performance on mmWave data.
+        As shown in both figures, the latent space of PoinTr maps partial point clouds into relatively compact clusters, whereas our model produces a more pronounced separation between points. In our setting, such compact clustering is undesirable because the inputs correspond to inherently dissimilar objects.
+        with distinct geometric features. The fact that PoinTr collapses these diverse partial observations into similar regions in the latent space suggests that
+        it fails to retain the geometric pairwise relationships between points, making it difficult to reconstruct the missing regions of the point cloud.
       </p>
 
+      <p>
+        In contrast, our model's ability to maintain clear separation between points implies that it is able to preserve the differences in the
+        underlying geometry of the object despite the noisy and sparse mmWave measurements. The ability to retain these geometric relationships provides the decoder
+        with richer, informative features, enabling our model to produce more accurate reconstructions. Ultimately, our analysis of the latent space aligns with our
+        results: our model is able to project the input partials into meaningful representations, allowing it to produce better reconstructions than PoinTr.
+      </p>
+      <h3>Limitations</h3>
       <p>
         Despite our improved performance in comparison to PoinTr, our model still has limitations in accuracy, specifically with small objects that have irregular shape. For the case of small objects,
         we tested our model on a large clamp, a medium clamp, and a small clamp. The real mmWave point cloud of the clamp was substantially lower resolution than the
@@ -720,18 +729,22 @@ window.MathJax = {
       </p>
       <b>TODO: maybe give chamfer distances of the clamps + visualize clamp completed PC</b>
       <p>
-        Furthermore, our model
-      </p>
+        We additionally observe poor performance on fruits, which we attribute to their high curvature—geometry that real mmWave sensors weren't able to capture accurately.
+        This limitation suggests that our synthetic data generation did not sufficiently model the complex mmWave behavior exhibited by such surfaces. Since our pipeline utilizes
+        a simplified approximation of mmWave physics, future work could improve performance by incorporating more accurate approximations into the data filters.
 
+      </p>
+      <b>TODO: Add apple figure stuff?</b>
       <p>
-        Thus, our model struggles to reconstruct geometries for objects that are small and have irregular shapes.
+        Finally, our model performs poorly on objects composed of regions with differing reflectivity, causing real-world mmWave point clouds to fragment into separate clusters. For instance, a
+        hammer’s metallic head and wooden handle produce two distinct returns, yielding disjoint point cloud segments.
+        Our synthetic data pipeline does not currently model such material-dependent reflectivity, leading to degraded performance on these mixed-material objects compared to those with uniform surfaces.
       </p>
+      <b>TODO: ADD HAMMER STUFF</b>
 
-      <b>TODO: significance is that we were able to apply specialize existing state of the art models into different sensor domains,
-        allowing us to fine tune models for specific applications or smth
-      </b>
-
-      <b>hammer: handle and head different materials -> different reflection so point cloud detached -> can't account for this</b>
+      <p>Nonetheless, we successfully adapted the PoinTr backbone to achieve substantially better performance on mmWave measurements. This result is significant, as it illustrates how transfer learning
+        can enable state-of-the-art models to be repurposed effectively for domain-specific applications, such as mmWave sensing.
+      </p>
     </div>
     <div class="margin-right-block"></div>
   </div>
