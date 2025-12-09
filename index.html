@@ -339,7 +339,7 @@ window.MathJax = {
       <p>
         Another substantial research field is the application of millimeter waves, or mmWave for short. mmWaves are radio-frequency signals
         that offer massive bandwidths for communication, which companies such as Verizon exploit for their 5G network. More interestingly to us, mmWaves can travel
-        through occlusions such as boxes to detect hidden objects. However, the distinct physical properties of mmWaves cause their measurements to be more sparse and noisy
+        through occlusions such as boxes, allowing us to generate point clouds of hidden objects. However, the distinct physical properties of mmWaves cause their measurements to be more sparse and noisy
          than visible-light sensors such as LiDARS, further motivating the field of point cloud completion using different sensors.
       </p>
 
@@ -410,12 +410,14 @@ window.MathJax = {
     <div class="main-content-block">
       <h1>Methods & Experiments</h1>
 	  <hr>
-    <p>We use PoinTr as a backbone architecture and make the following changes:</p>
+    <p>
+      We build upon PoinTr, a transformer-based point cloud completion model, and introduce several key modifications to adapt 
+      it to the unique physical characteristics of mmWave radar signals. Below, we describe our synthetic dataset generation pipeline, architectural changes, and density-aware loss.</p>
 
 
-	  <h3>Synthetic Datasets</h3>
+	  <h3>Synthetic Dataset</h3>
 	  <p>
-		We make our own synthetic datasets that mimic the real world mmWave data to train our mmWave reconstruction network. It's consist of two public available 3D shape datasets:
+		To train a reconstruction network tailored to mmWave data, we create a synthetic dataset designed to mimic mmWave reflections. Our dataset consists of three publicly available 3D shape repositories:
 		<ul>
 			<li><b>OmniObject3D</b>: A large multi-view 3D dataset comprised of 6,000 scans of real objects in 190 categories.</li>
       <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
@@ -444,10 +446,11 @@ window.MathJax = {
 	  </p>
 
     <p>
-      Existing reconstruction models are often trained on vision-like partials which come from visible-light sensors such as cameras or LiDAR. However, these
-      sensors have diffuse reflections and wide, uniform coverage, contrary to the specular, anisotropic, and noisy data received from mmWaves. Thus, in order to
-      shift domains and train our mmWave reconstruction network, we must first encode the physical characteristics of mmWaves into our training architecture. Here we use the point cloud of a lion with radar at the top as an example to demonstrate our preprocessing pipeline.
+      Existing point cloud completion models are typically trained on vision-style partials from visible-light sensors such as RGB-D cameras or LiDAR. mmWave signals, however,
+      produce sparse, specular, anisotropic reflections with significant noise and limited angular resolution. To close the domain gap, we encode mmWave physics into the training sampels. 
     </p>
+
+    We illustrate the preprocessing pipeline using a lion sample, assuming the radar is located above it. 
 
     <figure style="max-width: 200px; margin: 0 auto; text-align: center;">
       <img src="images/complete_lion.png" alt="Lion" style="max-width: 100%; height: auto;">
@@ -674,6 +677,27 @@ window.MathJax = {
         In contrast, PoinTr's latent space shows significant overlap among different objects, suggesting that it struggles to differentiate between them. This improved separation in the latent space likely contributes to our model's
         superior reconstruction performance on mmWave data.
       </p>
+
+      <p>
+        Despite our improved performance in comparison to PoinTr, our model still has limitations in accuracy, specifically with small objects that have irregular shape. For the case of small objects,
+        we tested our model on a large clamp, a medium clamp, and a small clamp. The real mmWave point cloud of the clamp was substantially lower resolution than the 
+        one for the large clamp, which resulted in a worse input to be fed to our model. As a result, our model's performance deteriorates as our test object gets smaller. This can be visualized in the figure
+        below. 
+      </p>
+      <b>TODO: maybe give chamfer distances of the clamps + visualize clamp completed PC</b>
+      <p>
+        Furthermore, our model 
+      </p>
+
+      <p>
+        Thus, our model struggles to reconstruct geometries for objects that are small and have irregular shapes.
+      </p>
+
+      <b>TODO: significance is that we were able to apply specialize existing state of the art models into different sensor domains,
+        allowing us to fine tune models for specific applications or smth
+      </b>
+      
+      <b>hammer: handle and head different materials -> different reflection so point cloud detached -> can't account for this</b>
     </div>
     <div class="margin-right-block"></div>
   </div>
@@ -683,7 +707,33 @@ window.MathJax = {
     <div class="main-content-block">
       <h1>Conclusion</h1>
 	  <hr>
-      wrap up
+      <q>
+        In this project, we set out to adapt state-of-the-art point cloud completion techniques to the fundamentally different sensing regime of mmWave radar. Unlike vision-based sensors, 
+        mmWave systems generate highly sparse, noisy, and specular measurements, making direct application of existing models ineffective. To address this challenge, we introduced a physics-aware 
+        synthetic data pipeline, a full-reconstruction architecture that enables implicit denoising, and a density-aware loss that promotes more uniform point distributions.
+
+        Through extensive experiments on both synthetic data and real-world measurements from the MITO dataset, our model consistently outperforms PoinTr across Chamfer Distance and F-Score metrics. 
+        Qualitative results further demonstrate improved geometric fidelity, especially in cases where mmWave sparsity is severe. Latent-space analysis suggests that our architectural changes lead to 
+        more structured and discriminative feature representations, enabling the model to better distinguish object categories and infer missing geometry.
+
+        Beyond performance gains, this work contributes to the broader understanding of deep learning in several ways:
+        <ul>
+          <li>It highlights the importance of incorporating domain-specific physics into data generation and model design, rather than relying solely on generic architectures.</li>
+
+          <li>It provides a concrete demonstration of how deep learning models behave under severe domain shift: models trained on vision-like data fail to generalize to mmWave inputs, whereas models equipped with the appropriate inductive biases can successfully transfer across sensing modalities.</li>
+
+          <li>It illustrates that architectural and loss-function choices directly reshape the latent manifold: by enforcing full reconstruction and density-aware optimization, the model learns latent clusters that better reflect object categories and geometric relationships.</li>
+
+          <li>It reinforces the broader understanding that deep learning is not just about scaling data or model size; rather, the alignment between data characteristics, sensor physics, and model assumptions fundamentally determines the quality of learned representations.</li>
+        </ul>
+
+
+        While our approach significantly improves reconstruction quality, challenges remain, especially for small or irregular objects that produce weak mmWave returns. Future work may integrate richer 
+        generative priors, differentiable radar simulation, or multi-sensor fusion to further enhance robustness.
+
+        Overall, our findings underscore a key lesson: deep learning models are not merely pattern matchers but systems whose effectiveness depends critically on the inductive biases we embed into their data, architecture, and objectives. By aligning these biases with the physics of mmWave sensing, 
+        we move toward reliable 3D perception beyond the domain of traditional vision sensors.
+      </q>
     </div>
     <div class="margin-right-block"></div>
   </div>
