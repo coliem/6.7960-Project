@@ -410,14 +410,14 @@ window.MathJax = {
         A major field of geometric surface reconstruction methods are those that interpolate a point cloud using
         the existing geometry without any additional information. For example, Delaunay-based methods exploit
         the fact that the reconstructed triangulated surface can be formed by a subcomplex of the Delaunay triangulation, which
-        connects a set of points with non-overlapping triangles such that no point is inside the circumscribed circle within any triangle. While these
+        connects a set of points with non-overlapping triangles such that no point is inside the circumscribed circle within any triangle ([<a href="#ref_1">1</a>], [<a href="#ref_2">2</a>]). While these
         methods have provable geometric and topological guarantees, they require dense sampling of the desired surface which is often
         impractical for imperfect real-world data. This limitation motivates a transition toward learning-based approaches, which aim
         to infer missing geometry based on learned priors rather than strict analytical rules.
       </p>
       <p>
         More recently, transformer-based models such as PoinTr leverage attention mechanisms to capture the geometric relationships
-        between points. The pipeline for PoinTr can be summarized into two key points:
+        between points [<a href="#ref_3">3</a>]. The pipeline for PoinTr can be summarized into two key points:
         <ol>
           <li>
             The point clouds in a local region are condensed into a feature vector which is called a "Point Proxy." Thus, the input point cloud is converted
@@ -436,7 +436,7 @@ window.MathJax = {
       <p>
         When benchmarked using the L1 Chamfer Distance on the PCN dataset, it was shown that PoinTr had substantially better performance
         than other state-of-the-art methods such as TopNet and Point Cloud Completion Network, both of which are also learning-based approaches
-        to the same problem. It is important to note, however, that all of these existing methods are able to produce reasonable outputs when given
+        to the same problem ([<a href="#ref_4">4</a>], [<a href="#ref_5">5</a>]). It is important to note, however, that all of these existing methods are able to produce reasonable outputs when given
         incomplete data.
       </p>
       <p>
@@ -581,7 +581,7 @@ window.MathJax = {
       The original PoinTr architecture predicts only the missing part of the point cloud and then concatenates the predicted
       completion with the input partial to form the final output. This design assumes that the input partial is relatively
       clean and reliable. For mmWave data, however, the partial observations are often very noisy and contain spurious
-      reflections. As a result, PoinTr model never has an opportunity to reinterpret and denoise the input partial. 
+      reflections. As a result, PoinTr model never has an opportunity to reinterpret and denoise the input partial.
     </p>
 
     <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
@@ -673,7 +673,7 @@ window.MathJax = {
           point sets.
         </li>
       </ul>
-    
+
       <h3>Quantitative Results</h3>
       <p>
         Table 1 summarizes the performance of PoinTr and our model on both the synthetic mmWave-style dataset and the MITO
@@ -771,7 +771,7 @@ window.MathJax = {
         one for the large clamp, which resulted in a worse input to be fed to our model. As a result, our model's performance deteriorates as our test object gets smaller. This can be visualized in the figure
         below.
       </p>
-      
+
       <figure style="max-width: 400px; margin: 0 auto; text-align: center;">
         <img src="images/clamps.png" alt="clamps" style="max-width: 100%; height: auto;">
         <figcaption style="font-size: 0.9rem; color: #555; margin-top: 0.35rem;">
@@ -852,8 +852,17 @@ window.MathJax = {
     <div class="main-content-block">
       <div class='citation' id="references" style="height:auto"><br>
         <span style="font-size:16px">References:</span><br><br>
-        <a id="ref_1"></a>[1] <a href="https://en.wikipedia.org/wiki/Allegory_of_the_cave">Allegory of the Cave</a>, Plato, c. 375 BC<br><br>
-        <a id="ref_2"></a>[2] <a href="">A Human-Level AGI</a>, OpenAI, 2025<br><br>
+        <a id="ref_1"></a>[1] <a href="https://www.cs.jhu.edu/~misha/Fall13b/Papers/Cazals06.pdf">Delaunay Triangulation Based Surface
+Reconstruction: Ideas and Algorithms</a>, Cazals et al., 2004<br><br>
+        <a id="ref_2"></a>[2] <a href="https://inria.hal.science/hal-01017700/document">State of the Art in Surface Reconstruction from Point
+Clouds</a>, Berger et al., 2014<br><br>
+        <a id="ref_3"></a>[3]
+<a href="https://arxiv.org/abs/2108.08839">PoinTr: Diverse Point Cloud Completion with Geometry-Aware Transformers</a>,
+Yu et al., 2021 <br><br>
+        <a id = "ref_4"></a>[4] <a href="https://ieeexplore.ieee.org/document/8953650">TopNet: Structural Point Cloud Decoder</a>,
+        Tchapmi et al., 2019 <br><br>
+        <a id = "ref_5"></a>[5] <a href="https://arxiv.org/abs/1808.00671">PCN: Point Cloud Completion Network</a>, Yuan et al., 2018 <br><br>
+
       </div>
     </div>
     <div class="margin-right-block"></div>
